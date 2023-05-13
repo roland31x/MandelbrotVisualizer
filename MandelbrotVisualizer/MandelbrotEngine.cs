@@ -357,16 +357,16 @@ namespace MandelbrotVisualizer
                 y = 2 * x * y + b;
                 x = temp;
                 n++;
-            } while (Math.Sqrt(x * x + y * y) < 4 && n < 500);
+            } while (Math.Sqrt(x * x + y * y) < 4 && n < 1000);
 
             Color result;
-            if (n == 500)
+            if (n == 1000)
             {
                 result = Color.FromRgb(0, 0, 0);
             }
             else
             {
-                result = Rainbow((float)n / (float)Complex.MaxIterations);
+                result = Rainbow((float)n / (float)500);
             }
 
             CurrentProgress += 1;

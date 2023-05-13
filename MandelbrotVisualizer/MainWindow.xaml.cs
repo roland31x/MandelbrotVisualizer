@@ -65,8 +65,8 @@ namespace MandelbrotVisualizer
             }
             isSaving = true;
             SaveButton.Content = "Saving...";
-            string path = @"E:\Stuff\SavedImage1.png";
-            await Task.Run(() => Engine.SaveImageToPath(path,8000));
+            string path = @"E:\Stuff\SavedImage2.png";
+            await Task.Run(() => Engine.SaveImageToPath(path,20000)); // careful with resolution
 
             isSaving = false;
             SaveButton.Content = "SAVE IMAGE";
