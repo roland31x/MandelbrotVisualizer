@@ -108,6 +108,8 @@ namespace MandelbrotVisualizer
         double _ye = 2;
         public double YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
         public double MirroredYEnd { get { return -1 * _ye; } }
+        int _maxiter = 500;
+        public int MaxIterations { get { return _maxiter; } set { _maxiter = value; OnPropertyChanged(); } }
 
         int _zoom = 100;
         int ZoomVal
@@ -223,6 +225,7 @@ namespace MandelbrotVisualizer
             XEnd = 2;
             YStart = -2;
             YEnd = 2;
+            MaxIterations = 500;
 
             await ReDraw();
         }
@@ -314,19 +317,18 @@ namespace MandelbrotVisualizer
                 y = 2 * x * y + b;
                 x = temp;
                 n++;
-            } while (Math.Sqrt(x * x + y * y) < 4 && n < Complex.MaxIterations);
+            } while (x * x + y * y < 16 && n < MaxIterations);
 
             Color result;
-            if (n == Complex.MaxIterations)
+            if (n == MaxIterations)
             {
                 result = Color.FromRgb(0, 0, 0);
             }
             else
             {
-                result = Rainbow((float)n / (float)Complex.MaxIterations);
+                result = Rainbow((float)n / (float)MaxIterations);
             }
 
-            CurrentProgress += 1;
             return Task.FromResult(result);
         }
         public static Color Rainbow(float progress)
@@ -392,6 +394,7 @@ namespace MandelbrotVisualizer
                     result[index + 1] = computed.G;
                     result[index + 2] = computed.R;
                     result[index + 3] = computed.A;
+                    CurrentProgress += 1;
                 }
             });
 

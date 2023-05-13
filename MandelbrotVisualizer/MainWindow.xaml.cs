@@ -43,7 +43,7 @@ namespace MandelbrotVisualizer
             BindingOperations.SetBinding(this, FrameworkElement.CursorProperty, new Binding("CurrentCursor") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(ImageResLabel, ContentControl.ContentProperty, new Binding("ResolutionString") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(RenderMultiplierTextbox, TextBox.TextProperty, new Binding("RenderMultiplier") { Source = Engine, Mode = BindingMode.OneWay });
-            IterationTextbox.Text = Complex.MaxIterations.ToString(); // careful with complex class, it's not used in operations
+            BindingOperations.SetBinding(IterationTextbox, TextBox.TextProperty, new Binding("MaxIterations") { Source = Engine, Mode = BindingMode.OneWay });
 
             BindingOperations.SetBinding(RenderMultiplierTextbox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(IterationTextbox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
@@ -108,7 +108,11 @@ namespace MandelbrotVisualizer
         {
             if(int.TryParse(IterationTextbox.Text, out int NewMaxIterations) && NewMaxIterations >= 100 && NewMaxIterations <= 10000)
             {
-                Complex.MaxIterations = NewMaxIterations;
+                if(NewMaxIterations == Engine.MaxIterations)
+                {
+                    return;
+                }
+                Engine.MaxIterations = NewMaxIterations;
             }
         }
 
