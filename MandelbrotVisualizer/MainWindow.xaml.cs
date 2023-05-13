@@ -31,11 +31,9 @@ namespace MandelbrotVisualizer
         bool isSaving = false;
         public MainWindow()
         {
-            InitializeComponent();
-            
-           
+            InitializeComponent();                     
         }
-        void BindCoordonates()
+        void BindUIStuff()
         {
             BindingOperations.SetBinding(XMINBOX, ContentControl.ContentProperty, new Binding("XStart") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(XMAXBOX, ContentControl.ContentProperty, new Binding("XEnd") { Source = Engine, Mode = BindingMode.OneWay });
@@ -43,11 +41,17 @@ namespace MandelbrotVisualizer
             BindingOperations.SetBinding(YMAXBOX, ContentControl.ContentProperty, new Binding("MirroredYStart") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(ProgressLabel, ContentControl.ContentProperty, new Binding("ProgressString") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(this, FrameworkElement.CursorProperty, new Binding("CurrentCursor") { Source = Engine, Mode = BindingMode.OneWay });
+            BindingOperations.SetBinding(ImageResLabel, ContentControl.ContentProperty, new Binding("ResolutionString") { Source = Engine, Mode = BindingMode.OneWay });
+            RenderMultiplierTextbox.Text = Engine.RenderMultiplier.ToString();
+            IterationTextbox.Text = Complex.MaxIterations.ToString(); // careful with complex class, it's not used in operations
+            BindingOperations.SetBinding(RenderMultiplierTextbox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
+            BindingOperations.SetBinding(IterationTextbox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
+
         }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             await Engine.InitializeOn(DrawingCanvas, (int)DrawingCanvas.Width, (int)DrawingCanvas.Height);
-            BindCoordonates();
+            BindUIStuff();
         }
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
@@ -64,13 +68,46 @@ namespace MandelbrotVisualizer
                 return;
             }
             isSaving = true;
+            SaveButton.IsEnabled = false;
             SaveButton.Content = "Saving...";
-            string path = @"E:\Stuff\SavedImage2.png";
-            await Task.Run(() => Engine.SaveImageToPath(path,20000)); // careful with resolution
+            string path = @"E:\Stuff\SavedImage3.png";
+            await Task.Run(() => Engine.SaveImageToPath(path,1600)); // careful with resolution
 
             isSaving = false;
-            SaveButton.Content = "SAVE IMAGE";
+            SaveButton.Content = "Save Image";
+            SaveButton.IsEnabled = true;
             
+        }
+
+        private async void RenderMultiplierTextbox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (double.TryParse(RenderMultiplierTextbox.Text, out double newMultiplier) && newMultiplier >= 1 && newMultiplier <= 28.9)
+            {
+                if(newMultiplier == Engine.RenderMultiplier)
+                {
+                    return;
+                }
+                Engine.RenderMultiplier = newMultiplier;
+                RenderInfoLabel.Content = $"New RenderMultiplier: {newMultiplier}x";
+                await Task.Delay(1000);
+                RenderInfoLabel.Content = string.Empty;
+
+            }
+            else
+            {
+                RenderMultiplierTextbox.Text = Engine.RenderMultiplier.ToString();
+                RenderInfoLabel.Content = $"New multiplier wasn't saved";
+                await Task.Delay(1000);
+                RenderInfoLabel.Content = string.Empty;
+            }
+        }
+
+        private void IterationTextbox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if(int.TryParse(IterationTextbox.Text, out int NewMaxIterations) && NewMaxIterations >= 100 && NewMaxIterations <= 10000)
+            {
+                Complex.MaxIterations = NewMaxIterations;
+            }
         }
     }
 }

@@ -27,6 +27,7 @@ namespace MandelbrotVisualizer
         }
 
         bool _ld = false;
+        public bool isNotLoading { get { return !_ld; } }
         public bool isLoading
         {
             get
@@ -36,6 +37,8 @@ namespace MandelbrotVisualizer
             private set
             {              
                 _ld = value;
+                OnPropertyChanged();
+                OnPropertyChanged("isNotLoading");
                 OnPropertyChanged("ProgressString");
                 if (_ld)
                 {
@@ -135,32 +138,39 @@ namespace MandelbrotVisualizer
         }
         
         int _DH = 800;
-        int DHeight
+        public int DHeight
         {
             get
             {
                 return _DH;
             }
-            set
+            private set
             {
                 DrawingCanvas.Height = value;
                 _DH = value;
             }
         }
         int _DW = 800;
-        int DWidth
+        public int DWidth
         {
             get
             {
                 return _DW;
             }
-            set
+            private set
             {
                 DrawingCanvas.Width = value;
                 _DW = value;
             }
         }
-        int RenderMultiplier = 1;
+        double _rm = 1;
+        public double RenderMultiplier { get { return _rm; } set { _rm = value; OnPropertyChanged(); } } 
+
+        int RenderWidth { get { return (int)(RenderMultiplier * _DW); } }
+        int RenderHeight { get { return (int)(RenderMultiplier * _DH); } }
+
+        public string ResolutionString { get { return RenderWidth + " x " + RenderHeight; } }
+
         int _progress = 0;
         int CurrentProgress { get { return _progress; } set { _progress = value; OnPropertyChanged("ProgressString"); } }
         double ConvertedProgress { get { return (double)_progress / (RenderMultiplier * DHeight * RenderMultiplier * DWidth); } }
@@ -245,7 +255,7 @@ namespace MandelbrotVisualizer
             if (isLoading)
                 return;
             isLoading = true;
-            ImageBrush awaited = await Task.Run(() => GetNewImage(DrawingCanvas));
+            ImageBrush awaited = await Task.Run(() => GetNewImage());
 
             await Task.Delay(100);
 
@@ -260,56 +270,17 @@ namespace MandelbrotVisualizer
                 CurrentCursor = Cursors.Arrow;
             }
 
+            OnPropertyChanged("ResolutionString");
             isLoading = false;
         }
-        Task<ImageBrush> GetNewImage(Canvas OnCanvas)
+        async Task<ImageBrush> GetNewImage()
         {
-            DrawingVisual drawingVisual = new DrawingVisual();
-            DrawingContext drawingContext = drawingVisual.RenderOpen();
-            DrawingContext drawingContext2 = drawingVisual.RenderOpen();
-            //for (int i = 0; i < DHeight; i++)
-            //{
-            //    for (int j = 0; j < DWidth; j++)
-            //    {
-            //        CurrentProgress = (double)(DHeight * i + j) / (double)(DHeight * DWidth);
-            //        double ConvertedX = (((double)i / DWidth) * (XEnd - XStart)) + XStart;
-            //        double ConvertedY = (((double)j / DHeight) * (YEnd - YStart)) + YStart;
-            //        await SetPixel(i, j, new Complex(ConvertedX, ConvertedY), drawingContext);
-            //    }
-            //}
+            byte[] result = await GetStream(RenderHeight,RenderWidth);
 
-            Color[,] pixels = new Color[DHeight * RenderMultiplier, DWidth * RenderMultiplier];
-            Parallel.For(0, DHeight * RenderMultiplier, i =>
-            {
-                for (int j = 0; j < DWidth * RenderMultiplier; j++)
-                {
-                    double convertedX = (((double)i / (DWidth * RenderMultiplier)) * (XEnd - XStart)) + XStart;
-                    double convertedY = (((double)j / (DHeight * RenderMultiplier)) * (YEnd - YStart)) + YStart;
-
-                    pixels[i, j] = GetColorForComplexNumber(convertedX, convertedY).Result;
-                }
-            });
-
-            CurrentProgress = RenderMultiplier * DHeight * RenderMultiplier * DWidth;
-
-            for(int i = 0; i < DHeight; i++)
-            {
-                for (int j = 0; j < DWidth; j ++)
-                {
-                    drawingContext.DrawRectangle(new SolidColorBrush(pixels[RenderMultiplier * i, RenderMultiplier * j]), null, new Rect(i, j, 1, 1));
-                }
-            }
-
-
-            drawingContext.Close();
-            RenderTargetBitmap bmp = new RenderTargetBitmap((int)DWidth, (int)DHeight, 96, 96, PixelFormats.Pbgra32);
-            bmp.Render(drawingVisual);
-            bmp.Freeze();
-            ImageBrush toReturn = new ImageBrush(bmp);
+            ImageBrush toReturn = new ImageBrush(BitmapSource.Create(RenderWidth, RenderHeight, 300, 300, PixelFormats.Bgra32, null, result, RenderHeight * 4));
             toReturn.Freeze();
 
-
-            return Task.FromResult(toReturn);
+            return toReturn;
         }
         Task SetPixel(int x, int y, Complex Converted, DrawingContext drawingContext)
         {
@@ -357,16 +328,16 @@ namespace MandelbrotVisualizer
                 y = 2 * x * y + b;
                 x = temp;
                 n++;
-            } while (Math.Sqrt(x * x + y * y) < 4 && n < 1000);
+            } while (Math.Sqrt(x * x + y * y) < 4 && n < Complex.MaxIterations);
 
             Color result;
-            if (n == 1000)
+            if (n == Complex.MaxIterations)
             {
                 result = Color.FromRgb(0, 0, 0);
             }
             else
             {
-                result = Rainbow((float)n / (float)500);
+                result = Rainbow((float)n / (float)Complex.MaxIterations);
             }
 
             CurrentProgress += 1;
@@ -411,15 +382,36 @@ namespace MandelbrotVisualizer
         {
             BitmapSource bitmap = BitmapSource.Create(Resolution, Resolution, 300, 300, PixelFormats.Bgra32, null, await GetStreamForImage(Resolution,Resolution),Resolution * 4);
 
-            var encoder = new PngBitmapEncoder();
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(bitmap));
 
-            using (var stream = new FileStream(filename, FileMode.Create))
+            using (FileStream stream = new FileStream(filename, FileMode.Create))
             {
                 encoder.Save(stream);
             }
         }
+        Task<byte[]> GetStream(int h, int w)
+        {
+            byte[] result = new byte[h * w * 4];
 
+            Parallel.For(0, h, y =>
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    int index = (y * w + x) * 4;
+                    double convertedX = (((double)x / (w)) * (XEnd - XStart)) + XStart;
+                    double convertedY = (((double)y / (h)) * (YEnd - YStart)) + YStart;
+                    Color computed = GetColorForComplexNumber(convertedX, convertedY).Result;
+                    result[index] = computed.B;
+                    result[index + 1] = computed.G;
+                    result[index + 2] = computed.R;
+                    result[index + 3] = computed.A;
+                }
+            });
+
+            return Task.FromResult(result);
+
+        }
         Task<byte[]> GetStreamForImage(int h, int w)
         {
             byte[] result = new byte[h * w * 4];
