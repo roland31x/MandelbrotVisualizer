@@ -13,7 +13,7 @@
     <Grid>
         <Canvas>
             <Border Canvas.Top="79" Canvas.Left="239" BorderBrush="Black" BorderThickness="2,2,2,2">
-                <Canvas x:Name="DrawingCanvas" Background="Aquamarine" Height="800" Width="800" Canvas.Top="80" Canvas.Left="240" HorizontalAlignment="Center" VerticalAlignment="Top"></Canvas>
+                <Canvas x:Name="MyCanvas" Background="Aquamarine" Height="800" Width="800" Canvas.Top="80" Canvas.Left="240" HorizontalAlignment="Center" VerticalAlignment="Top"></Canvas>
             </Border>
 
             <Label x:Name="YMINBOX" HorizontalAlignment="Center" VerticalAlignment="Top" Width="400" HorizontalContentAlignment="Center" FontSize="14" Content="" Canvas.Left="440" Canvas.Top="883"/>
@@ -21,13 +21,14 @@
             <Label x:Name="YMAXBOX" HorizontalAlignment="Center" VerticalAlignment="Top" Width="400" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="14" Content="" Canvas.Left="441" Canvas.Top="50"/>
             <Label x:Name="XMINBOX" HorizontalAlignment="Left" VerticalAlignment="Center" Width="229" HorizontalContentAlignment="Right" FontSize="14" Content="" RenderTransformOrigin="0.5,0.5" Canvas.Top="466" VerticalContentAlignment="Center" Canvas.Left="10"/>
             <Label x:Name="ProgressLabel" Width="400" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" Content="App is loading..." Canvas.Left="440" Canvas.Top="10" HorizontalAlignment="Center" VerticalAlignment="Top" FontWeight="Bold" FontStyle="Italic"/>
-            <Button x:Name="SaveButton" Content="SAVE IMAGE" Canvas.Left="1050" Canvas.Top="10" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="22" Width="200" FontFamily="Verdana" Background="#FF00FF27" Click="SaveButton_Click"/>
-            <Button x:Name="Placeholder_button" Content="yet to implement" Canvas.Left="10" Canvas.Top="10" FontSize="22" Width="200" FontFamily="Verdana" Background="#FF00FF27" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="Hidden"/>
+            <Button x:Name="SaveButton" Content="SAVE IMAGE" Canvas.Left="1050" Canvas.Top="10" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="22" Width="200" FontFamily="Verdana" Background="#FF00FF27" Click="SaveButton_Click" Height="54"/>
+            <Button x:Name="ResetButton" Content="Reset" Canvas.Left="30" Canvas.Top="10" FontSize="22" Width="196" FontFamily="Verdana" Background="#FF00FF27" HorizontalAlignment="Left" VerticalAlignment="Center" Height="49" Click="ResetBUtton_Click"/>
             <Label Height="26" Width="210" Canvas.Left="20" Canvas.Top="136" Content="Render Multiplier:" HorizontalAlignment="Center" VerticalAlignment="Top">
                 <Label.ToolTip>
                     <ToolTip>
                         <TextBlock>
-                            *base image is 800x800 so values can work up to x28.9 times, after that the byte array of the image will overflow.
+                            This sets the resultion the set image will be calculated at, use higher multipliers for higher quality image at the expense of time taken to calculate.<LineBreak/>
+                            * base image is 800x800 so values can work up to x28.9 times, after that the byte array of the image will overflow.
                         </TextBlock>
                     </ToolTip>
                 </Label.ToolTip>
@@ -38,7 +39,8 @@
                 <TextBox.ToolTip>
                     <ToolTip>
                         <TextBlock>
-                            *base image is 800x800 so values can work up to x28.9 times, after that the byte array of the image will overflow.
+                           This sets the resultion the set image will be calculated at, use higher multipliers for higher quality image at the expense of time taken to calculate.<LineBreak/>
+                            * base image is 800x800 so values can work up to x28.9 times, after that the byte array of the image will overflow.
                         </TextBlock>
                     </ToolTip>
                 </TextBox.ToolTip>

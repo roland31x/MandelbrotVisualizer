@@ -191,27 +191,40 @@ namespace MandelbrotVisualizer
 
 
         public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
         protected MandelbrotEngine()
         {
-            _hov = new Border() { Width = ZoomVal, Height = ZoomVal, BorderThickness = new Thickness(2), BorderBrush = Brushes.White, Visibility = Visibility.Collapsed };           
-        }
-        public async Task InitializeOn(Canvas canvas, int XSize, int YSize)
-        {
-            DrawingCanvas = canvas;         
+            _hov = new Border() { Width = ZoomVal, Height = ZoomVal, BorderThickness = new Thickness(2), BorderBrush = Brushes.White, Visibility = Visibility.Collapsed };
+            DrawingCanvas = new Canvas();
+            DrawingCanvas.Children.Add(_hov);
             DrawingCanvas.MouseDown += DrawingCanvas_MouseDown;
             DrawingCanvas.MouseEnter += DrawingCanvas_MouseEnter;
             DrawingCanvas.MouseLeave += DrawingCanvas_MouseLeave;
             DrawingCanvas.MouseMove += DrawingCanvas_MouseMove;
             DrawingCanvas.MouseWheel += DrawingCanvas_MouseWheel;
+        }
+        public async Task InitializeOn(Canvas canvas, int XSize, int YSize)
+        {
+            canvas.Children.Add(DrawingCanvas);            
             DWidth = XSize;
             DHeight = YSize;
-            DrawingCanvas.Children.Add(_hov);
-
+            
             await ReDraw();
         }
-        protected void OnPropertyChanged([CallerMemberName] string name = "")
+        public async Task ResetToDefaults()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            RenderMultiplier = 1;
+            DWidth = 800;
+            DHeight = 800;
+            XStart = -2;
+            XEnd = 2;
+            YStart = -2;
+            YEnd = 2;
+
+            await ReDraw();
         }
         private void DrawingCanvas_MouseMove(object sender, MouseEventArgs e)
         {
@@ -225,6 +238,14 @@ namespace MandelbrotVisualizer
         {
             if (isLoading)
                 return;
+            if(RenderHeight >= 8000 || RenderWidth >= 8000)
+            {
+                MessageBoxResult warning = MessageBox.Show("You are about to begin calculating a massive resultion image, this might take a while, are you sure you want to do it?", "Warning!", MessageBoxButton.YesNo);
+                if(warning == MessageBoxResult.No)
+                {
+                    return;
+                }
+            }
             Canvas clicked = (Canvas)sender;
 
             Point p = e.GetPosition(clicked);
@@ -281,41 +302,6 @@ namespace MandelbrotVisualizer
             toReturn.Freeze();
 
             return toReturn;
-        }
-        Task SetPixel(int x, int y, Complex Converted, DrawingContext drawingContext)
-        {
-
-            int n = Complex.NumberOfIterations(Converted);
-            Color result;
-            if (n == Complex.MaxIterations)
-            {
-                result = Color.FromRgb(0, 0, 0);
-            }
-            else
-            {
-                result = Rainbow((float)n / (float)Complex.MaxIterations);
-            }
-
-            drawingContext.DrawRectangle(new SolidColorBrush(result), null, new Rect(x, y, 1, 1));
-
-            return Task.CompletedTask;
-        }
-        Task<Color> GetColorForPixel(Complex Converted)
-        {
-
-            int n = Complex.NumberOfIterations(Converted);
-            Color result;
-            if (n == Complex.MaxIterations)
-            {
-                result = Color.FromRgb(0, 0, 0);
-            }
-            else
-            {
-                result = Rainbow((float)n / (float)Complex.MaxIterations);
-            }
-
-            CurrentProgress += 1;
-            return Task.FromResult(result);
         }
         Task<Color> GetColorForComplexNumber(double a, double b)
         {

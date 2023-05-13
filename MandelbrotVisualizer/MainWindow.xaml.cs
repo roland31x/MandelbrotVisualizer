@@ -42,15 +42,17 @@ namespace MandelbrotVisualizer
             BindingOperations.SetBinding(ProgressLabel, ContentControl.ContentProperty, new Binding("ProgressString") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(this, FrameworkElement.CursorProperty, new Binding("CurrentCursor") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(ImageResLabel, ContentControl.ContentProperty, new Binding("ResolutionString") { Source = Engine, Mode = BindingMode.OneWay });
-            RenderMultiplierTextbox.Text = Engine.RenderMultiplier.ToString();
+            BindingOperations.SetBinding(RenderMultiplierTextbox, TextBox.TextProperty, new Binding("RenderMultiplier") { Source = Engine, Mode = BindingMode.OneWay });
             IterationTextbox.Text = Complex.MaxIterations.ToString(); // careful with complex class, it's not used in operations
+
             BindingOperations.SetBinding(RenderMultiplierTextbox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(IterationTextbox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
+            BindingOperations.SetBinding(ResetButton, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
 
         }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            await Engine.InitializeOn(DrawingCanvas, (int)DrawingCanvas.Width, (int)DrawingCanvas.Height);
+            await Engine.InitializeOn(MyCanvas, (int)MyCanvas.Width, (int)MyCanvas.Height);
             BindUIStuff();
         }
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -108,6 +110,11 @@ namespace MandelbrotVisualizer
             {
                 Complex.MaxIterations = NewMaxIterations;
             }
+        }
+
+        private async void ResetBUtton_Click(object sender, RoutedEventArgs e)
+        {
+            await Engine.ResetToDefaults();
         }
     }
 }
