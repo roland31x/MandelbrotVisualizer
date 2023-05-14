@@ -48,6 +48,15 @@
             <Label x:Name="RenderInfoLabel" Height="26" Width="210" Canvas.Left="20" Canvas.Top="162" Content="" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
             <Label Height="26" Width="210" Canvas.Left="20" Canvas.Top="188" Content="Number of Iterations:" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBox x:Name="IterationTextbox" Height="26" Width="90" Canvas.Left="145" Canvas.Top="188" TextChanged="IterationTextbox_TextChanged" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="0.567,2.487"/>
+            <ComboBox x:Name="SaveResComboBox" Canvas.Left="1090" Canvas.Top="105" Width="120" SelectionChanged="ComboBox_SelectionChanged" HorizontalAlignment="Center" VerticalAlignment="Top" SelectedIndex="0">
+                <ComboBoxItem Content="800 x 800" IsSelected="True" Tag="800"/>
+                <ComboBoxItem Content="1600 x 1600" Tag="1600" />
+                <ComboBoxItem Content="2048 x 2048" Tag="2048"/>
+                <ComboBoxItem Content="4096 x 4096" Tag="4096"/>
+                <ComboBoxItem Content="8192 x 8192" Tag="8192"/>
+                <ComboBoxItem Content="16384 x 16384" Tag="16384"/>
+            </ComboBox>
+            <Label Height="26" Width="210" Canvas.Left="1045" Canvas.Top="79" Content="Save Resolution:" HorizontalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Canvas>
     </Grid>
 </Window>

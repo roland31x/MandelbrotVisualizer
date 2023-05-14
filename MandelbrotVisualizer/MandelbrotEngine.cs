@@ -229,51 +229,6 @@ namespace MandelbrotVisualizer
 
             await ReDraw();
         }
-        private void DrawingCanvas_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (isLoading)
-                return;
-            Point current = e.GetPosition(DrawingCanvas);
-            Canvas.SetTop(_hov, current.Y - _hov.Height / 2);
-            Canvas.SetLeft(_hov, current.X - _hov.Width / 2);
-        }
-        private async void DrawingCanvas_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (isLoading)
-                return;
-            if(RenderHeight >= 8000 || RenderWidth >= 8000)
-            {
-                MessageBoxResult warning = MessageBox.Show("You are about to begin calculating a massive resultion image, this might take a while, are you sure you want to do it?", "Warning!", MessageBoxButton.YesNo);
-                if(warning == MessageBoxResult.No)
-                {
-                    return;
-                }
-            }
-            Canvas clicked = (Canvas)sender;
-
-            Point p = e.GetPosition(clicked);
-            double newXstart = (((double)p.X - (double)ZoomVal / 2) / (double)clicked.Width) * (XEnd - XStart) + XStart;
-            double newXend = (((double)p.X + (double)ZoomVal / 2) / (double)clicked.Width) * (XEnd - XStart) + XStart;
-            double newYstart = (((double)p.Y - (double)ZoomVal / 2) / (double)clicked.Height) * (YEnd - YStart) + YStart;
-            double newYend = (((double)p.Y + (double)ZoomVal / 2) / (double)clicked.Height) * (YEnd - YStart) + YStart;
-
-            XStart = newXstart;
-            XEnd = newXend;
-            YStart = newYstart;
-            YEnd = newYend;
-
-            await ReDraw();
-        }
-
-        private void DrawingCanvas_MouseEnter(object sender, MouseEventArgs e)
-        {
-            CurrentCursor = Cursors.None;
-        }
-
-        private void DrawingCanvas_MouseLeave(object sender, MouseEventArgs e)
-        {
-            CurrentCursor = Cursors.Arrow;
-        }
         async Task ReDraw()
         {
             if (isLoading)
@@ -331,6 +286,31 @@ namespace MandelbrotVisualizer
 
             return Task.FromResult(result);
         }
+        Task<Color> GetColorForComplexNumber(double a, double b, int MaxIter)
+        {
+            double x = a;
+            double y = b;
+            int n = 0;
+            do
+            {
+                double temp = x * x - y * y + a;
+                y = 2 * x * y + b;
+                x = temp;
+                n++;
+            } while (x * x + y * y < 16 && n < MaxIter);
+
+            Color result;
+            if (n == MaxIter)
+            {
+                result = Color.FromRgb(0, 0, 0);
+            }
+            else
+            {
+                result = Rainbow((float)n / (float)MaxIter);
+            }
+
+            return Task.FromResult(result);
+        }
         public static Color Rainbow(float progress)
         {
             float div = (Math.Abs(progress % 1) * 6);
@@ -354,21 +334,14 @@ namespace MandelbrotVisualizer
             }
         }
 
-        private void DrawingCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        public async Task SaveImageToPath(string filename, int Resolution, int Iterations)
         {
-            if (e.Delta > 0)
-            {
-                ZoomVal += 3;
-            }
-            else if (e.Delta < 0)
-            {
-                ZoomVal -= 3;
-            }
-        }
+            double xs = XStart;
+            double xe = XEnd;
+            double ys = YStart;
+            double ye = YEnd;
 
-        public async Task SaveImageToPath(string filename, int Resolution)
-        {
-            BitmapSource bitmap = BitmapSource.Create(Resolution, Resolution, 300, 300, PixelFormats.Bgra32, null, await GetStreamForImage(Resolution,Resolution),Resolution * 4);
+            BitmapSource bitmap = BitmapSource.Create(Resolution, Resolution, 300, 300, PixelFormats.Bgra32, null, await GetStreamForImage(Resolution,Resolution,Iterations,xs,xe,ys,ye),Resolution * 4);
 
             PngBitmapEncoder encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(bitmap));
@@ -401,7 +374,7 @@ namespace MandelbrotVisualizer
             return Task.FromResult(result);
 
         }
-        Task<byte[]> GetStreamForImage(int h, int w)
+        Task<byte[]> GetStreamForImage(int h, int w, int Iterations, double XStart, double XEnd, double YStart, double YEnd) // so saving can happen in the background while using the app
         {
             byte[] result = new byte[h * w * 4];
 
@@ -412,13 +385,14 @@ namespace MandelbrotVisualizer
                     int index = (y * w + x) * 4;
                     double convertedX = (((double)x / (w)) * (XEnd - XStart)) + XStart;
                     double convertedY = (((double)y / (h)) * (YEnd - YStart)) + YStart;
-                    Color computed = GetColorForComplexNumber(convertedX, convertedY).Result;
+                    Color computed = GetColorForComplexNumber(convertedX, convertedY, Iterations).Result;
                     result[index] = computed.B;
                     result[index + 1] = computed.G;
                     result[index + 2] = computed.R;
                     result[index + 3] = computed.A;
                 }               
             }
+
             // checkerboard upscale
             for (int y = 0; y < h; y++)
             {
@@ -487,6 +461,62 @@ namespace MandelbrotVisualizer
             }
 
             return Task.FromResult(result);
+        }
+        private void DrawingCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isLoading)
+                return;
+            Point current = e.GetPosition(DrawingCanvas);
+            Canvas.SetTop(_hov, current.Y - _hov.Height / 2);
+            Canvas.SetLeft(_hov, current.X - _hov.Width / 2);
+        }
+        private void DrawingCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Delta > 0)
+            {
+                ZoomVal += 3;
+            }
+            else if (e.Delta < 0)
+            {
+                ZoomVal -= 3;
+            }
+        }
+        private async void DrawingCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (isLoading)
+                return;
+            if (RenderHeight >= 8000 || RenderWidth >= 8000)
+            {
+                MessageBoxResult warning = MessageBox.Show("You are about to begin calculating a massive resultion image, this might take a while, are you sure you want to do it?", "Warning!", MessageBoxButton.YesNo);
+                if (warning == MessageBoxResult.No)
+                {
+                    return;
+                }
+            }
+            Canvas clicked = (Canvas)sender;
+
+            Point p = e.GetPosition(clicked);
+            double newXstart = (((double)p.X - (double)ZoomVal / 2) / (double)clicked.Width) * (XEnd - XStart) + XStart;
+            double newXend = (((double)p.X + (double)ZoomVal / 2) / (double)clicked.Width) * (XEnd - XStart) + XStart;
+            double newYstart = (((double)p.Y - (double)ZoomVal / 2) / (double)clicked.Height) * (YEnd - YStart) + YStart;
+            double newYend = (((double)p.Y + (double)ZoomVal / 2) / (double)clicked.Height) * (YEnd - YStart) + YStart;
+
+            XStart = newXstart;
+            XEnd = newXend;
+            YStart = newYstart;
+            YEnd = newYend;
+
+            await ReDraw();
+        }
+
+        private void DrawingCanvas_MouseEnter(object sender, MouseEventArgs e)
+        {
+            CurrentCursor = Cursors.None;
+        }
+
+        private void DrawingCanvas_MouseLeave(object sender, MouseEventArgs e)
+        {
+            CurrentCursor = Cursors.Arrow;
         }
     }
 }

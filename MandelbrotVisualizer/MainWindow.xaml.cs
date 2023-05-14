@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
@@ -29,6 +30,7 @@ namespace MandelbrotVisualizer
         
         MandelbrotEngine Engine = MandelbrotEngine.Instance;
         bool isSaving = false;
+        int SaveResolution = 800;
         public MainWindow()
         {
             InitializeComponent();                     
@@ -69,16 +71,47 @@ namespace MandelbrotVisualizer
             {
                 return;
             }
+            
+            string path = Directory.GetCurrentDirectory();
+            using (System.Windows.Forms.FolderBrowserDialog dialog = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    path = dialog.SelectedPath;
+                }
+                else
+                {
+                    MessageBoxResult check = MessageBox.Show($"Bad folder selected, would you like to continue saving the image to:{Environment.NewLine}{path}", "Error", MessageBoxButton.YesNo);
+                    if(check == MessageBoxResult.No)
+                    {
+                        return;
+                    }
+                }
+            }
+            Stopwatch SaveTime = new Stopwatch();
+            SaveTime.Start();
             isSaving = true;
             SaveButton.IsEnabled = false;
+            SaveResComboBox.IsEnabled = false;
             SaveButton.Content = "Saving...";
-            string path = @"E:\Stuff\SavedImage3.png";
-            await Task.Run(() => Engine.SaveImageToPath(path,1600)); // careful with resolution
 
+            path += @"\SavedImage1.png";
+
+            int i = 1;
+            while (File.Exists(path))
+            {
+                path = path.Replace($@"\SavedImage{i}.png",$@"\SavedImage{i + 1}.png");
+                i++;
+            }
+            int currentIterations = Engine.MaxIterations;
+            await Task.Run(() => Engine.SaveImageToPath(path, SaveResolution, currentIterations));
             isSaving = false;
             SaveButton.Content = "Save Image";
             SaveButton.IsEnabled = true;
-            
+            SaveResComboBox.IsEnabled = true;
+            SaveTime.Stop();
+            MessageBox.Show("Image saved to:" + Environment.NewLine + path + Environment.NewLine + $"The operation took {SaveTime.Elapsed.ToString(@"mm\:ss")}","Save complete.");
         }
 
         private async void RenderMultiplierTextbox_TextChanged(object sender, TextChangedEventArgs e)
@@ -119,6 +152,27 @@ namespace MandelbrotVisualizer
         private async void ResetBUtton_Click(object sender, RoutedEventArgs e)
         {
             await Engine.ResetToDefaults();
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cb = (ComboBox)sender;
+            int SaveResolution = Convert.ToInt32((cb.SelectedItem as ComboBoxItem)!.Tag);
+            if(SaveResolution < 400)
+            {
+                SaveResolution = 800;
+                cb.SelectedIndex = 0;
+            }
+            if(SaveResolution > 8000)
+            {
+                MessageBoxResult mbr = MessageBox.Show($"{SaveResolution} x {SaveResolution} is going to result in a massive image and will take a long time to save, are you sure you want to use this resolution?","Warning",MessageBoxButton.YesNo );
+                if(mbr == MessageBoxResult.No)
+                {
+                    cb.SelectedIndex = 0;
+                    return;
+                }
+            }
+            this.SaveResolution = SaveResolution;
         }
     }
 }
