@@ -20,7 +20,7 @@ namespace MandelbrotVisualizer
                 y = 2 * x * y + b;
                 x = temp;
                 n++;
-            } while (x * x + y * y < 16 && n < MaxIter);
+            } while (x * x + y * y < 4 && n < MaxIter);
 
             Color result;
             if (n == MaxIter)
@@ -45,7 +45,7 @@ namespace MandelbrotVisualizer
                 y = 2 * x * y + b;
                 x = temp;
                 n++;
-            } while (x * x + y * y < 16 && n < MaxIter);
+            } while (x * x + y * y < 4 && n < MaxIter);
 
             Color result;
             if (n == MaxIter)
