@@ -95,19 +95,19 @@ namespace MandelbrotVisualizer
         }
         Canvas DrawingCanvas { get; set; }
 
-        double _xs = -2;
-        public double XStart { get { return _xs; } private set { _xs = value; OnPropertyChanged(); } }
+        decimal _xs = -2;
+        public decimal XStart { get { return _xs; } private set { _xs = value; OnPropertyChanged(); } }
 
-        double _ys = -2;
-        public double YStart { get { return _ys; } private set { _ys = value; OnPropertyChanged(); OnPropertyChanged("MirroredYStart"); } }
-        public double MirroredYStart { get { return -1 * _ys; } }
+        decimal _ys = -2;
+        public decimal YStart { get { return _ys; } private set { _ys = value; OnPropertyChanged(); OnPropertyChanged("MirroredYStart"); } }
+        public decimal MirroredYStart { get { return -1 * _ys; } }
 
-        double _xe = 2;
-        public double XEnd { get { return _xe; } private set { _xe = value; OnPropertyChanged(); } }
+        decimal _xe = 2;
+        public decimal XEnd { get { return _xe; } private set { _xe = value; OnPropertyChanged(); } }
 
-        double _ye = 2;
-        public double YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
-        public double MirroredYEnd { get { return -1 * _ye; } }
+        decimal _ye = 2;
+        public decimal YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
+        public decimal MirroredYEnd { get { return -1 * _ye; } }
         int _maxiter = 500;
         public int MaxIterations { get { return _maxiter; } set { _maxiter = value; OnPropertyChanged(); } }
 
@@ -261,85 +261,13 @@ namespace MandelbrotVisualizer
 
             return toReturn;
         }
-        Task<Color> GetColorForComplexNumber(double a, double b)
-        {
-            double x = a;
-            double y = b;
-            int n = 0;
-            do
-            {
-                double temp = x * x - y * y + a;
-                y = 2 * x * y + b;
-                x = temp;
-                n++;
-            } while (x * x + y * y < 16 && n < MaxIterations);
-
-            Color result;
-            if (n == MaxIterations)
-            {
-                result = Color.FromRgb(0, 0, 0);
-            }
-            else
-            {
-                result = Rainbow((float)n / (float)MaxIterations);
-            }
-
-            return Task.FromResult(result);
-        }
-        Task<Color> GetColorForComplexNumber(double a, double b, int MaxIter)
-        {
-            double x = a;
-            double y = b;
-            int n = 0;
-            do
-            {
-                double temp = x * x - y * y + a;
-                y = 2 * x * y + b;
-                x = temp;
-                n++;
-            } while (x * x + y * y < 16 && n < MaxIter);
-
-            Color result;
-            if (n == MaxIter)
-            {
-                result = Color.FromRgb(0, 0, 0);
-            }
-            else
-            {
-                result = Rainbow((float)n / (float)MaxIter);
-            }
-
-            return Task.FromResult(result);
-        }
-        public static Color Rainbow(float progress)
-        {
-            float div = (Math.Abs(progress % 1) * 6);
-            int ascending = (int)((div % 1) * 255);
-            int descending = 255 - ascending;
-
-            switch ((int)div)
-            {
-                case 0:
-                    return Color.FromArgb(255, 255, (byte)ascending, 0);
-                case 1:
-                    return Color.FromArgb(255, (byte)descending, 255, 0);
-                case 2:
-                    return Color.FromArgb(255, 0, 255, (byte)ascending);
-                case 3:
-                    return Color.FromArgb(255, 0, (byte)descending, 255);
-                case 4:
-                    return Color.FromArgb(255, (byte)ascending, 0, 255);
-                default: // case 5:
-                    return Color.FromArgb(255, 255, 0, (byte)descending);
-            }
-        }
 
         public async Task SaveImageToPath(string filename, int Resolution, int Iterations)
         {
-            double xs = XStart;
-            double xe = XEnd;
-            double ys = YStart;
-            double ye = YEnd;
+            decimal xs = XStart;
+            decimal xe = XEnd;
+            decimal ys = YStart;
+            decimal ye = YEnd;
 
             BitmapSource bitmap = BitmapSource.Create(Resolution, Resolution, 300, 300, PixelFormats.Bgra32, null, await GetStreamForImage(Resolution,Resolution,Iterations,xs,xe,ys,ye),Resolution * 4);
 
@@ -360,9 +288,11 @@ namespace MandelbrotVisualizer
                 for (int x = 0; x < w; x++)
                 {
                     int index = (y * w + x) * 4;
-                    double convertedX = (((double)x / (w)) * (XEnd - XStart)) + XStart;
-                    double convertedY = (((double)y / (h)) * (YEnd - YStart)) + YStart;
-                    Color computed = GetColorForComplexNumber(convertedX, convertedY).Result;
+                    decimal convertedX = (((decimal)x / (w)) * (XEnd - XStart)) + XStart;
+                    decimal convertedY = (((decimal)y / (h)) * (YEnd - YStart)) + YStart;
+                    // change functions here 
+                    Color computed = ComplexMaths.GetColorForComplexNumber(convertedX, convertedY, MaxIterations).Result;
+                    //
                     result[index] = computed.B;
                     result[index + 1] = computed.G;
                     result[index + 2] = computed.R;
@@ -374,7 +304,7 @@ namespace MandelbrotVisualizer
             return Task.FromResult(result);
 
         }
-        Task<byte[]> GetStreamForImage(int h, int w, int Iterations, double XStart, double XEnd, double YStart, double YEnd) // so saving can happen in the background while using the app
+        Task<byte[]> GetStreamForImage(int h, int w, int Iterations, decimal XStart, decimal XEnd, decimal YStart, decimal YEnd) // so saving can happen in the background while using the app
         {
             byte[] result = new byte[h * w * 4];
 
@@ -383,9 +313,11 @@ namespace MandelbrotVisualizer
                 for (int x = y % 2; x < w; x+= 2)
                 {
                     int index = (y * w + x) * 4;
-                    double convertedX = (((double)x / (w)) * (XEnd - XStart)) + XStart;
-                    double convertedY = (((double)y / (h)) * (YEnd - YStart)) + YStart;
-                    Color computed = GetColorForComplexNumber(convertedX, convertedY, Iterations).Result;
+                    decimal convertedX = (((decimal)x / (w)) * (XEnd - XStart)) + XStart;
+                    decimal convertedY = (((decimal)y / (h)) * (YEnd - YStart)) + YStart;
+                    // change functions here
+                    Color computed = ComplexMaths.GetColorForComplexNumber(convertedX, convertedY, Iterations).Result;
+                    //
                     result[index] = computed.B;
                     result[index + 1] = computed.G;
                     result[index + 2] = computed.R;
@@ -496,10 +428,10 @@ namespace MandelbrotVisualizer
             Canvas clicked = (Canvas)sender;
 
             Point p = e.GetPosition(clicked);
-            double newXstart = (((double)p.X - (double)ZoomVal / 2) / (double)clicked.Width) * (XEnd - XStart) + XStart;
-            double newXend = (((double)p.X + (double)ZoomVal / 2) / (double)clicked.Width) * (XEnd - XStart) + XStart;
-            double newYstart = (((double)p.Y - (double)ZoomVal / 2) / (double)clicked.Height) * (YEnd - YStart) + YStart;
-            double newYend = (((double)p.Y + (double)ZoomVal / 2) / (double)clicked.Height) * (YEnd - YStart) + YStart;
+            decimal newXstart = (((decimal)p.X - (decimal)ZoomVal / 2) / (decimal)clicked.Width) * (XEnd - XStart) + XStart;
+            decimal newXend = (((decimal)p.X + (decimal)ZoomVal / 2) / (decimal)clicked.Width) * (XEnd - XStart) + XStart;
+            decimal newYstart = (((decimal)p.Y - (decimal)ZoomVal / 2) / (decimal)clicked.Height) * (YEnd - YStart) + YStart;
+            decimal newYend = (((decimal)p.Y + (decimal)ZoomVal / 2) / (decimal)clicked.Height) * (YEnd - YStart) + YStart;
 
             XStart = newXstart;
             XEnd = newXend;
