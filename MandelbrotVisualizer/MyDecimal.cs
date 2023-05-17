@@ -44,15 +44,16 @@ namespace MandelbrotVisualizer
             }
             usedDecimals = j;
         }
-        public MyDecimal()
+        public MyDecimal(int size)
         {
             intValue = 0;
-            fraction = new int[50];
+            fraction = new int[size > 50 ? size : 50];
             usedDecimals = 0;
         }
         public static MyDecimal operator +(MyDecimal left, MyDecimal right)
         {
-            MyDecimal toReturn = new MyDecimal();
+            MyDecimal toReturn = new MyDecimal(Math.Min(left.CurrentSize,right.CurrentSize));
+
 
 
             return toReturn;
@@ -171,142 +172,5 @@ namespace MandelbrotVisualizer
         {
             return this.ToString().GetHashCode();
         }
-    }
-
-    public struct BigDecimal : IEquatable<BigDecimal>, IComparable<BigDecimal>
-    {
-        public static BigDecimal Zero = new BigDecimal();
-        public static BigDecimal Four = new BigDecimal(new BigInteger(4));
-        public static BigDecimal Two = new BigDecimal(new BigInteger(2));
-
-        public BigInteger IntegerPart { get; private set; }
-        public BigInteger FractionalPart { get; private set; }
-
-        public BigDecimal(BigInteger integerPart, BigInteger fractionalPart)
-        {
-            IntegerPart = integerPart;
-            FractionalPart = fractionalPart;
-        }
-
-        public BigDecimal(BigInteger integerPart)
-        {
-            IntegerPart = integerPart;
-            FractionalPart = BigInteger.Zero;
-        }
-
-        public BigDecimal()
-        {
-            IntegerPart = BigInteger.Zero;
-            FractionalPart = BigInteger.Zero;
-        }
-
-        public static BigDecimal operator +(BigDecimal left, BigDecimal right)
-        {
-            BigInteger integerPart = left.IntegerPart + right.IntegerPart;
-            BigInteger fractionalPart = left.FractionalPart + right.FractionalPart;
-
-            // Check for carry-over from fractional part
-            if (BigInteger.Abs(fractionalPart) >= BigInteger.Pow(10, Scale))
-            {
-                integerPart += BigInteger.DivRem(fractionalPart, BigInteger.Pow(10, Scale), out fractionalPart);
-            }
-
-            return new BigDecimal(integerPart, fractionalPart);
-        }
-
-        public static BigDecimal operator -(BigDecimal left, BigDecimal right)
-        {
-            BigInteger integerPart = left.IntegerPart - right.IntegerPart;
-            BigInteger fractionalPart = left.FractionalPart - right.FractionalPart;
-
-            // Check for borrow from fractional part
-            if (fractionalPart < 0)
-            {
-                integerPart--;
-                fractionalPart += BigInteger.Pow(10, Scale);
-            }
-
-            return new BigDecimal(integerPart, fractionalPart);
-        }
-
-        public static BigDecimal operator *(BigDecimal left, BigDecimal right)
-        {
-            BigInteger integerPart = left.IntegerPart * right.IntegerPart;
-            BigInteger fractionalPart = left.FractionalPart * right.FractionalPart;
-
-            // Scale down fractional part
-            fractionalPart /= BigInteger.Pow(10, Scale * 2);
-
-            // Add overflow from integer part multiplication
-            BigInteger overflow = (left.IntegerPart * right.FractionalPart) + (right.IntegerPart * left.FractionalPart);
-            overflow /= BigInteger.Pow(10, Scale);
-
-            return new BigDecimal(integerPart + overflow, fractionalPart);
-        }
-
-        public static BigDecimal operator /(BigDecimal dividend, BigDecimal divisor)
-        {
-            BigInteger scaledDividend = (dividend.IntegerPart * BigInteger.Pow(10, Scale)) + dividend.FractionalPart;
-            BigInteger scaledDivisor = (divisor.IntegerPart * BigInteger.Pow(10, Scale)) + divisor.FractionalPart;
-
-            BigInteger integerPart = BigInteger.DivRem(scaledDividend, scaledDivisor, out BigInteger fractionalPart);
-            fractionalPart *= BigInteger.Pow(10, Scale);
-
-            return new BigDecimal(integerPart, fractionalPart);
-        }
-
-        public static bool operator ==(BigDecimal left, BigDecimal right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(BigDecimal left, BigDecimal right)
-        {
-            return !left.Equals(right);
-        }
-
-        public static bool operator <(BigDecimal left, BigDecimal right)
-        {
-            return left.CompareTo(right) < 0;
-        }
-
-        public static bool operator >(BigDecimal left, BigDecimal right)
-        {
-            return left.CompareTo(right) > 0;
-        }
-
-        public static bool operator <=(BigDecimal left, BigDecimal right)
-        {
-            return left.CompareTo(right) <= 0;
-        }
-
-        public static bool operator >=(BigDecimal left, BigDecimal right)
-        {
-            return left.CompareTo(right) >= 0;
-        }
-
-        public int CompareTo(BigDecimal other)
-        {
-            BigInteger scaledThis = (IntegerPart * BigInteger.Pow(10, Scale)) + FractionalPart;
-            BigInteger scaledOther = (other.IntegerPart * BigInteger.Pow(10, Scale)) + other.FractionalPart;
-
-            return scaledThis.CompareTo(scaledOther);
-        }
-
-        // Additional overloaded arithmetic operations can be implemented in a similar manner
-
-        public override string ToString()
-        {
-            string decimalPart = FractionalPart.ToString().PadLeft(Scale, '0');
-            return $"{IntegerPart}.{decimalPart}";
-        }
-
-        public bool Equals(BigDecimal other)
-        {
-            return this.CompareTo(other) == 0;
-        }
-
-        // Define the desired scale for the decimal representation
-        private const int Scale = 50;
     }
 }

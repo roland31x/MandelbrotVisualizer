@@ -42,7 +42,7 @@ namespace MandelbrotVisualizer
             do
             {
                 MyDecimal temp = x * x - y * y + a;
-                y = MyDecimal.Four * x * y + b;
+                y = MyDecimal.Two * x * y + b;
                 x = temp;
                 n++;
             } while (x * x + y * y < MyDecimal.Four && n < MaxIter);
