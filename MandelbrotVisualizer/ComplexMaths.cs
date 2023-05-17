@@ -34,6 +34,31 @@ namespace MandelbrotVisualizer
 
             return Task.FromResult(result);
         }
+        public static Task<Color> GetColorForComplexNumber(MyDecimal a, MyDecimal b, int MaxIter)
+        {
+            MyDecimal x = a;
+            MyDecimal y = b;
+            int n = 0;
+            do
+            {
+                MyDecimal temp = x * x - y * y + a;
+                y = MyDecimal.Four * x * y + b;
+                x = temp;
+                n++;
+            } while (x * x + y * y < MyDecimal.Four && n < MaxIter);
+
+            Color result;
+            if (n == MaxIter)
+            {
+                result = Color.FromRgb(0, 0, 0);
+            }
+            else
+            {
+                result = Rainbow((float)n / (float)MaxIter);
+            }
+
+            return Task.FromResult(result);
+        }
         public static Task<Color> GetColorForComplexNumber(double a, double b, int MaxIter)
         {
             double x = a;

@@ -95,19 +95,19 @@ namespace MandelbrotVisualizer
         }
         Canvas DrawingCanvas { get; set; }
 
-        decimal _xs = -2;
-        public decimal XStart { get { return _xs; } private set { _xs = value; OnPropertyChanged(); } }
+        MyDecimal _xs = new MyDecimal(-2m);
+        public MyDecimal XStart { get { return _xs; } private set { _xs = value; OnPropertyChanged(); } }
 
-        decimal _ys = -2;
-        public decimal YStart { get { return _ys; } private set { _ys = value; OnPropertyChanged(); OnPropertyChanged("MirroredYStart"); } }
-        public decimal MirroredYStart { get { return -1 * _ys; } }
+        MyDecimal _ys = new MyDecimal(-2m);
+        public MyDecimal YStart { get { return _ys; } private set { _ys = value; OnPropertyChanged(); OnPropertyChanged("MirroredYStart"); } }
+        public MyDecimal MirroredYStart { get { return MyDecimal.MinusOne * _ys; } }
 
-        decimal _xe = 2;
-        public decimal XEnd { get { return _xe; } private set { _xe = value; OnPropertyChanged(); } }
+        MyDecimal _xe = new MyDecimal(2m);
+        public MyDecimal XEnd { get { return _xe; } private set { _xe = value; OnPropertyChanged(); } }
 
-        decimal _ye = 2;
-        public decimal YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
-        public decimal MirroredYEnd { get { return -1 * _ye; } }
+        MyDecimal _ye = new MyDecimal(2m);
+        public MyDecimal YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
+        public MyDecimal MirroredYEnd { get { return MyDecimal.MinusOne * _ye; } }
         int _maxiter = 500;
         public int MaxIterations { get { return _maxiter; } set { _maxiter = value; OnPropertyChanged(); } }
 
@@ -221,10 +221,10 @@ namespace MandelbrotVisualizer
             RenderMultiplier = 1;
             DWidth = 800;
             DHeight = 800;
-            XStart = -2;
-            XEnd = 2;
-            YStart = -2;
-            YEnd = 2;
+            XStart = new MyDecimal(-2m);
+            XEnd = new MyDecimal(2m);
+            YStart = new MyDecimal(-2m);
+            YEnd = new MyDecimal(2m);
             MaxIterations = 500;
 
             await ReDraw();
@@ -264,20 +264,20 @@ namespace MandelbrotVisualizer
 
         public async Task SaveImageToPath(string filename, int Resolution, int Iterations)
         {
-            decimal xs = XStart;
-            decimal xe = XEnd;
-            decimal ys = YStart;
-            decimal ye = YEnd;
+            //decimal xs = XStart;
+            //decimal xe = XEnd;
+            //decimal ys = YStart;
+            //decimal ye = YEnd;
 
-            BitmapSource bitmap = BitmapSource.Create(Resolution, Resolution, 300, 300, PixelFormats.Bgra32, null, await GetStreamForImage(Resolution,Resolution,Iterations,xs,xe,ys,ye),Resolution * 4);
+            //BitmapSource bitmap = BitmapSource.Create(Resolution, Resolution, 300, 300, PixelFormats.Bgra32, null, await GetStreamForImage(Resolution,Resolution,Iterations,xs,xe,ys,ye),Resolution * 4);
 
-            PngBitmapEncoder encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            //PngBitmapEncoder encoder = new PngBitmapEncoder();
+            //encoder.Frames.Add(BitmapFrame.Create(bitmap));
 
-            using (FileStream stream = new FileStream(filename, FileMode.Create))
-            {
-                encoder.Save(stream);
-            }
+            //using (FileStream stream = new FileStream(filename, FileMode.Create))
+            //{
+            //    encoder.Save(stream);
+            //}
         }
         Task<byte[]> GetStream(int h, int w)
         {
@@ -288,8 +288,8 @@ namespace MandelbrotVisualizer
                 for (int x = 0; x < w; x++)
                 {
                     int index = (y * w + x) * 4;
-                    decimal convertedX = (((decimal)x / (w)) * (XEnd - XStart)) + XStart;
-                    decimal convertedY = (((decimal)y / (h)) * (YEnd - YStart)) + YStart;
+                    MyDecimal convertedX = (new MyDecimal(((decimal)x / (w))) * (XEnd - XStart)) + XStart;
+                    MyDecimal convertedY = (new MyDecimal(((decimal)y / (h))) * (YEnd - YStart)) + YStart;
                     // change functions here 
                     Color computed = ComplexMaths.GetColorForComplexNumber(convertedX, convertedY, MaxIterations).Result;
                     //
