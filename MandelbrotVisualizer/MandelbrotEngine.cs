@@ -108,7 +108,7 @@ namespace MandelbrotVisualizer
         MyDecimal _ye = new MyDecimal(2m);
         public MyDecimal YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
         public MyDecimal MirroredYEnd { get { return MyDecimal.MinusOne * _ye; } }
-        int _maxiter = 500;
+        int _maxiter = 100;
         public int MaxIterations { get { return _maxiter; } set { _maxiter = value; OnPropertyChanged(); } }
 
         int _zoom = 100;
@@ -291,7 +291,7 @@ namespace MandelbrotVisualizer
                     MyDecimal convertedX = (new MyDecimal(((decimal)x / (w))) * (XEnd - XStart)) + XStart;
                     MyDecimal convertedY = (new MyDecimal(((decimal)y / (h))) * (YEnd - YStart)) + YStart;
                     // change functions here 
-                    Color computed = ComplexMaths.GetColorForComplexNumber(convertedX.ToDouble(), convertedY.ToDouble(), MaxIterations).Result;
+                    Color computed = ComplexMaths.GetColorForComplexNumber(convertedX, convertedY, MaxIterations).Result;
                     //
                     result[index] = computed.B;
                     result[index + 1] = computed.G;

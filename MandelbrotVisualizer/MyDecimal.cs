@@ -20,7 +20,6 @@ namespace MandelbrotVisualizer
 
         bool isPositive;
         int intValue;
-        int Sign { get { return Math.Sign(intValue); } }
         int[] fraction;
         int? _uD;
         int usedDecimals
@@ -66,7 +65,7 @@ namespace MandelbrotVisualizer
             sb.Append(value);
             bool ok = false;
             int j = 0;
-            for (int i = 0; i < sb.Length; i++)
+            for (int i = 0; i < sb.Length && i < CurrentMaxPrecision; i++)
             {
                 if (ok)
                 {
@@ -107,15 +106,15 @@ namespace MandelbrotVisualizer
             }
 
             MyDecimal toReturn = new MyDecimal(Math.Max(left.CurrentSize, right.CurrentSize));
-            int sizediff = left.CurrentSize - right.CurrentSize;
-            if (sizediff > 0)
-            {
-                right.ExtendPrecision(sizediff);
-            }
-            else if (sizediff < 0)
-            {
-                left.ExtendPrecision(Math.Abs(sizediff));
-            }
+            //int sizediff = left.CurrentSize - right.CurrentSize;
+            //if (sizediff > 0)
+            //{
+            //    right.ExtendPrecision(sizediff);
+            //}
+            //else if (sizediff < 0)
+            //{
+            //    left.ExtendPrecision(Math.Abs(sizediff));
+            //}
             toReturn.intValue = left.intValue + right.intValue;
             for (int i = Math.Max(left.usedDecimals, right.usedDecimals) - 1; i >= 1; i--)
             {
@@ -164,15 +163,15 @@ namespace MandelbrotVisualizer
             }
 
             MyDecimal toReturn = new MyDecimal(Math.Max(left.CurrentSize, right.CurrentSize));
-            int sizediff = left.CurrentSize - right.CurrentSize;
-            if (sizediff > 0)
-            {
-                right.ExtendPrecision(sizediff);
-            }
-            else if (sizediff < 0)
-            {
-                left.ExtendPrecision(Math.Abs(sizediff));
-            }
+            //int sizediff = left.CurrentSize - right.CurrentSize;
+            //if (sizediff > 0)
+            //{
+            //    right.ExtendPrecision(sizediff);
+            //}
+            //else if (sizediff < 0)
+            //{
+            //    left.ExtendPrecision(Math.Abs(sizediff));
+            //}
 
             for (int i = Math.Max(left.usedDecimals, right.usedDecimals) - 1; i >= 1; i--)
             {
@@ -387,16 +386,6 @@ namespace MandelbrotVisualizer
             toReturn.intValue = intValue;
             toReturn.isPositive = isPositive;
             return toReturn;
-        }
-        void ExtendPrecision(int AmountOfExtraDigits)
-        {
-            int size = CurrentSize + AmountOfExtraDigits;
-            int[] newfrac = new int[50 * (size / 50 + 1)];
-            for (int i = 0; i < usedDecimals; i++)
-            {
-                newfrac[i] = fraction[i];
-            }
-            fraction = newfrac;
         }
         public override string ToString()
         {
