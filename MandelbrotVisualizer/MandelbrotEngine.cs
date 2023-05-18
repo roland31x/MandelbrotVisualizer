@@ -108,7 +108,7 @@ namespace MandelbrotVisualizer
         MyDecimal _ye = new MyDecimal(2m);
         public MyDecimal YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
         public MyDecimal MirroredYEnd { get { return MyDecimal.MinusOne * _ye; } }
-        int _maxiter = 500;
+        int _maxiter = 100;
         public int MaxIterations { get { return _maxiter; } set { _maxiter = value; OnPropertyChanged(); } }
 
         int _zoom = 100;
@@ -428,10 +428,10 @@ namespace MandelbrotVisualizer
             Canvas clicked = (Canvas)sender;
 
             Point p = e.GetPosition(clicked);
-            decimal newXstart = (((decimal)p.X - (decimal)ZoomVal / 2) / (decimal)clicked.Width) * (XEnd - XStart) + XStart;
-            decimal newXend = (((decimal)p.X + (decimal)ZoomVal / 2) / (decimal)clicked.Width) * (XEnd - XStart) + XStart;
-            decimal newYstart = (((decimal)p.Y - (decimal)ZoomVal / 2) / (decimal)clicked.Height) * (YEnd - YStart) + YStart;
-            decimal newYend = (((decimal)p.Y + (decimal)ZoomVal / 2) / (decimal)clicked.Height) * (YEnd - YStart) + YStart;
+            MyDecimal newXstart = (new MyDecimal(((decimal)p.X - (decimal)ZoomVal / 2) / (decimal)clicked.Width)) * (XEnd - XStart) + XStart;
+            MyDecimal newXend = (new MyDecimal(((decimal)p.X + (decimal)ZoomVal / 2) / (decimal)clicked.Width)) * (XEnd - XStart) + XStart;
+            MyDecimal newYstart = (new MyDecimal(((decimal)p.Y - (decimal)ZoomVal / 2) / (decimal)clicked.Height)) * (YEnd - YStart) + YStart;
+            MyDecimal newYend = (new MyDecimal(((decimal)p.Y + (decimal)ZoomVal / 2) / (decimal)clicked.Height)) * (YEnd - YStart) + YStart;
 
             XStart = newXstart;
             XEnd = newXend;
