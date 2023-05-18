@@ -16,24 +16,36 @@ namespace MandelbrotVisualizer
         public static MyDecimal MinusOne = new MyDecimal(-1m);
         public static MyDecimal Zero = new MyDecimal(0m);
 
-        public static int CurrentMaxPrecision = 30;
+        public static int CurrentMaxPrecision = 10;
 
         bool isPositive;
         int intValue;
         int Sign { get { return Math.Sign(intValue); } }
         int[] fraction;
+        int? _uD;
         int usedDecimals
         {
             get
             {
-                for (int i = CurrentSize - 1; i >= 0; i--)
+                if(_uD == null)
                 {
-                    if (fraction[i] != 0)
+                    for (int i = CurrentSize - 1; i >= 0; i--)
                     {
-                        return i + 1;
+                        if (fraction[i] != 0)
+                        {
+                            _uD = i + 1;
+                            return i + 1;
+                        }
                     }
+                    _uD = 0;
+                    return 0;
+                    
                 }
-                return 0;
+                else
+                {
+                    return (int)_uD;
+                }
+                
             }
         }
         int CurrentSize { get { return fraction.Length; } }
@@ -395,10 +407,17 @@ namespace MandelbrotVisualizer
             }
             stringBuilder.Append(intValue);
             stringBuilder.Append('.');
-            for (int i = 0; i < usedDecimals; i++)
+            if(usedDecimals == 0)
             {
-                stringBuilder.Append(fraction[i]);
+                stringBuilder.Append('0');
             }
+            else
+            {
+                for (int i = 0; i < usedDecimals; i++)
+                {
+                    stringBuilder.Append(fraction[i]);
+                }
+            }           
             return stringBuilder.ToString();
         }
 
@@ -437,13 +456,49 @@ namespace MandelbrotVisualizer
             }
             return 0;
         }
+        public decimal ToDecimal()
+        {
+            decimal toReturn = 0;
+            toReturn += intValue;
+            
+            for(int i = 0; i < 28 && i < usedDecimals; i++)
+            {
+                toReturn += fraction[i] / (decimal)Math.Pow(10, i + 1);
+            }
 
+            if (!isPositive)
+            {
+                toReturn *= -1;
+            }
+
+
+
+            return toReturn;
+        }
+        public double ToDouble()
+        {
+            double toReturn = 0;
+            toReturn += intValue;
+
+            for (int i = 0; i < usedDecimals; i++)
+            {
+                toReturn += fraction[i] / (double)Math.Pow(10, i + 1);
+            }
+
+            if (!isPositive)
+            {
+                toReturn *= -1;
+            }
+
+            return toReturn;
+
+        }
         public bool Equals(MyDecimal other)
         {
             return this.CompareTo(other) == 0;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is MyDecimal)
             {

@@ -108,7 +108,7 @@ namespace MandelbrotVisualizer
         MyDecimal _ye = new MyDecimal(2m);
         public MyDecimal YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
         public MyDecimal MirroredYEnd { get { return MyDecimal.MinusOne * _ye; } }
-        int _maxiter = 100;
+        int _maxiter = 500;
         public int MaxIterations { get { return _maxiter; } set { _maxiter = value; OnPropertyChanged(); } }
 
         int _zoom = 100;
@@ -210,10 +210,10 @@ namespace MandelbrotVisualizer
         }
         public async Task InitializeOn(Canvas canvas, int XSize, int YSize)
         {
-            canvas.Children.Add(DrawingCanvas);            
+            canvas.Children.Add(DrawingCanvas);
             DWidth = XSize;
             DHeight = YSize;
-            
+
             await ReDraw();
         }
         public async Task ResetToDefaults()
@@ -225,7 +225,7 @@ namespace MandelbrotVisualizer
             XEnd = new MyDecimal(2m);
             YStart = new MyDecimal(-2m);
             YEnd = new MyDecimal(2m);
-            MaxIterations = 500;
+            MaxIterations = 100;
 
             await ReDraw();
         }
@@ -291,7 +291,7 @@ namespace MandelbrotVisualizer
                     MyDecimal convertedX = (new MyDecimal(((decimal)x / (w))) * (XEnd - XStart)) + XStart;
                     MyDecimal convertedY = (new MyDecimal(((decimal)y / (h))) * (YEnd - YStart)) + YStart;
                     // change functions here 
-                    Color computed = ComplexMaths.GetColorForComplexNumber(convertedX, convertedY, MaxIterations).Result;
+                    Color computed = ComplexMaths.GetColorForComplexNumber(convertedX.ToDouble(), convertedY.ToDouble(), MaxIterations).Result;
                     //
                     result[index] = computed.B;
                     result[index + 1] = computed.G;
@@ -300,6 +300,24 @@ namespace MandelbrotVisualizer
                     CurrentProgress += 1;
                 }
             });
+
+            //for(int y = 0; y < h; y++)
+            //{
+            //    for (int x = 0; x < w; x++)
+            //    {
+            //        int index = (y * w + x) * 4;
+            //        MyDecimal convertedX = (new MyDecimal((decimal)x / w) * (XEnd - XStart)) + XStart;
+            //        MyDecimal convertedY = (new MyDecimal((decimal)y / h) * (YEnd - YStart)) + YStart;
+            //        // change functions here 
+            //        Color computed = ComplexMaths.GetColorForComplexNumber(convertedX, convertedY, MaxIterations).Result;
+            //        //
+            //        result[index] = computed.B;
+            //        result[index + 1] = computed.G;
+            //        result[index + 2] = computed.R;
+            //        result[index + 3] = computed.A;
+            //        CurrentProgress += 1;
+            //    }
+            //}
 
             return Task.FromResult(result);
 
