@@ -25,7 +25,7 @@ namespace MandelbrotVisualizer
                 return _singleton;
             }
         }
-
+        public Precision CurrentPrecision { get; set; }
         bool _ld = false;
         public bool isNotLoading { get { return !_ld; } }
         public bool isLoading
@@ -95,19 +95,19 @@ namespace MandelbrotVisualizer
         }
         Canvas DrawingCanvas { get; set; }
 
-        MyDecimal _xs = new MyDecimal(-2m);
-        public MyDecimal XStart { get { return _xs; } private set { _xs = value; OnPropertyChanged(); } }
+        HighPrecisionDecimal _xs = new HighPrecisionDecimal(-2m);
+        public HighPrecisionDecimal XStart { get { return _xs; } private set { _xs = value; OnPropertyChanged(); } }
 
-        MyDecimal _ys = new MyDecimal(-2m);
-        public MyDecimal YStart { get { return _ys; } private set { _ys = value; OnPropertyChanged(); OnPropertyChanged("MirroredYStart"); } }
-        public MyDecimal MirroredYStart { get { return MyDecimal.MinusOne * _ys; } }
+        HighPrecisionDecimal _ys = new HighPrecisionDecimal(-2m);
+        public HighPrecisionDecimal YStart { get { return _ys; } private set { _ys = value; OnPropertyChanged(); OnPropertyChanged("MirroredYStart"); } }
+        public HighPrecisionDecimal MirroredYStart { get { return HighPrecisionDecimal.MinusOne * _ys; } }
 
-        MyDecimal _xe = new MyDecimal(2m);
-        public MyDecimal XEnd { get { return _xe; } private set { _xe = value; OnPropertyChanged(); } }
+        HighPrecisionDecimal _xe = new HighPrecisionDecimal(2m);
+        public HighPrecisionDecimal XEnd { get { return _xe; } private set { _xe = value; OnPropertyChanged(); } }
 
-        MyDecimal _ye = new MyDecimal(2m);
-        public MyDecimal YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
-        public MyDecimal MirroredYEnd { get { return MyDecimal.MinusOne * _ye; } }
+        HighPrecisionDecimal _ye = new HighPrecisionDecimal(2m);
+        public HighPrecisionDecimal YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
+        public HighPrecisionDecimal MirroredYEnd { get { return HighPrecisionDecimal.MinusOne * _ye; } }
         int _maxiter = 100;
         public int MaxIterations { get { return _maxiter; } set { _maxiter = value; OnPropertyChanged(); } }
 
@@ -207,6 +207,7 @@ namespace MandelbrotVisualizer
             DrawingCanvas.MouseLeave += DrawingCanvas_MouseLeave;
             DrawingCanvas.MouseMove += DrawingCanvas_MouseMove;
             DrawingCanvas.MouseWheel += DrawingCanvas_MouseWheel;
+            CurrentPrecision = Precision.DOUBLE;
         }
         public async Task InitializeOn(Canvas canvas, int XSize, int YSize)
         {
@@ -221,10 +222,10 @@ namespace MandelbrotVisualizer
             RenderMultiplier = 1;
             DWidth = 800;
             DHeight = 800;
-            XStart = new MyDecimal(-2m);
-            XEnd = new MyDecimal(2m);
-            YStart = new MyDecimal(-2m);
-            YEnd = new MyDecimal(2m);
+            XStart = new HighPrecisionDecimal(-2m);
+            XEnd = new HighPrecisionDecimal(2m);
+            YStart = new HighPrecisionDecimal(-2m);
+            YEnd = new HighPrecisionDecimal(2m);
             MaxIterations = 100;
 
             await ReDraw();
@@ -264,20 +265,20 @@ namespace MandelbrotVisualizer
 
         public async Task SaveImageToPath(string filename, int Resolution, int Iterations)
         {
-            //decimal xs = XStart;
-            //decimal xe = XEnd;
-            //decimal ys = YStart;
-            //decimal ye = YEnd;
+            HighPrecisionDecimal xs = XStart;
+            HighPrecisionDecimal xe = XEnd;
+            HighPrecisionDecimal ys = YStart;
+            HighPrecisionDecimal ye = YEnd;
 
-            //BitmapSource bitmap = BitmapSource.Create(Resolution, Resolution, 300, 300, PixelFormats.Bgra32, null, await GetStreamForImage(Resolution,Resolution,Iterations,xs,xe,ys,ye),Resolution * 4);
+            BitmapSource bitmap = BitmapSource.Create(Resolution, Resolution, 300, 300, PixelFormats.Bgra32, null, await GetStreamForImage(Resolution, Resolution, Iterations, xs, xe, ys, ye), Resolution * 4);
 
-            //PngBitmapEncoder encoder = new PngBitmapEncoder();
-            //encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
 
-            //using (FileStream stream = new FileStream(filename, FileMode.Create))
-            //{
-            //    encoder.Save(stream);
-            //}
+            using (FileStream stream = new FileStream(filename, FileMode.Create))
+            {
+                encoder.Save(stream);
+            }
         }
         Task<byte[]> GetStream(int h, int w)
         {
@@ -288,10 +289,22 @@ namespace MandelbrotVisualizer
                 for (int x = 0; x < w; x++)
                 {
                     int index = (y * w + x) * 4;
-                    MyDecimal convertedX = (new MyDecimal(((decimal)x / (w))) * (XEnd - XStart)) + XStart;
-                    MyDecimal convertedY = (new MyDecimal(((decimal)y / (h))) * (YEnd - YStart)) + YStart;
-                    // change functions here 
-                    Color computed = ComplexMaths.GetColorForComplexNumber(convertedX, convertedY, MaxIterations).Result;
+                    HighPrecisionDecimal convertedX = (new HighPrecisionDecimal(((decimal)x / (w))) * (XEnd - XStart)) + XStart;
+                    HighPrecisionDecimal convertedY = (new HighPrecisionDecimal(((decimal)y / (h))) * (YEnd - YStart)) + YStart;
+                    // change functions here
+                    Color computed;
+                    switch (CurrentPrecision)
+                    {
+                        case Precision.DOUBLE:
+                            computed = ComplexMaths.GetColorForComplexNumber(convertedX.ToDouble(), convertedY.ToDouble(), MaxIterations).Result;
+                            break;
+                        case Precision.DECIMAL:
+                            computed = ComplexMaths.GetColorForComplexNumber(convertedX.ToDecimal(), convertedY.ToDecimal(), MaxIterations).Result;
+                            break;
+                        case Precision.HIGHPRECISION:
+                            computed = ComplexMaths.GetColorForComplexNumber(convertedX, convertedY, MaxIterations).Result;
+                            break;
+                    }                  
                     //
                     result[index] = computed.B;
                     result[index + 1] = computed.G;
@@ -322,7 +335,7 @@ namespace MandelbrotVisualizer
             return Task.FromResult(result);
 
         }
-        Task<byte[]> GetStreamForImage(int h, int w, int Iterations, decimal XStart, decimal XEnd, decimal YStart, decimal YEnd) // so saving can happen in the background while using the app
+        Task<byte[]> GetStreamForImage(int h, int w, int Iterations, HighPrecisionDecimal XStart, HighPrecisionDecimal XEnd, HighPrecisionDecimal YStart, HighPrecisionDecimal YEnd) // so saving can happen in the background while using the app
         {
             byte[] result = new byte[h * w * 4];
 
@@ -331,8 +344,8 @@ namespace MandelbrotVisualizer
                 for (int x = y % 2; x < w; x+= 2)
                 {
                     int index = (y * w + x) * 4;
-                    decimal convertedX = (((decimal)x / (w)) * (XEnd - XStart)) + XStart;
-                    decimal convertedY = (((decimal)y / (h)) * (YEnd - YStart)) + YStart;
+                    HighPrecisionDecimal convertedX = (new HighPrecisionDecimal(((decimal)x / (w))) * (XEnd - XStart)) + XStart;
+                    HighPrecisionDecimal convertedY = (new HighPrecisionDecimal(((decimal)y / (h))) * (YEnd - YStart)) + YStart;
                     // change functions here
                     Color computed = ComplexMaths.GetColorForComplexNumber(convertedX, convertedY, Iterations).Result;
                     //
@@ -446,10 +459,10 @@ namespace MandelbrotVisualizer
             Canvas clicked = (Canvas)sender;
 
             Point p = e.GetPosition(clicked);
-            MyDecimal newXstart = (new MyDecimal(((decimal)p.X - (decimal)ZoomVal / 2) / (decimal)clicked.Width)) * (XEnd - XStart) + XStart;
-            MyDecimal newXend = (new MyDecimal(((decimal)p.X + (decimal)ZoomVal / 2) / (decimal)clicked.Width)) * (XEnd - XStart) + XStart;
-            MyDecimal newYstart = (new MyDecimal(((decimal)p.Y - (decimal)ZoomVal / 2) / (decimal)clicked.Height)) * (YEnd - YStart) + YStart;
-            MyDecimal newYend = (new MyDecimal(((decimal)p.Y + (decimal)ZoomVal / 2) / (decimal)clicked.Height)) * (YEnd - YStart) + YStart;
+            HighPrecisionDecimal newXstart = (new HighPrecisionDecimal(((decimal)p.X - (decimal)ZoomVal / 2) / (decimal)clicked.Width)) * (XEnd - XStart) + XStart;
+            HighPrecisionDecimal newXend = (new HighPrecisionDecimal(((decimal)p.X + (decimal)ZoomVal / 2) / (decimal)clicked.Width)) * (XEnd - XStart) + XStart;
+            HighPrecisionDecimal newYstart = (new HighPrecisionDecimal(((decimal)p.Y - (decimal)ZoomVal / 2) / (decimal)clicked.Height)) * (YEnd - YStart) + YStart;
+            HighPrecisionDecimal newYend = (new HighPrecisionDecimal(((decimal)p.Y + (decimal)ZoomVal / 2) / (decimal)clicked.Height)) * (YEnd - YStart) + YStart;
 
             XStart = newXstart;
             XEnd = newXend;

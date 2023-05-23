@@ -34,6 +34,16 @@
                 </Label.ToolTip>
             </Label>
             <Label Height="26" Width="210" Canvas.Left="20" Canvas.Top="79" Content="Current Image Resolution:" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center"/>
+            <Label Height="26" Width="214" Canvas.Left="20" Canvas.Top="235" Content="Precision:" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <Label.ToolTip>
+                    <ToolTip>
+                        <TextBlock>
+                                Sets the engine calculation mode.<LineBreak/>
+                                * High precision decimal is very, very slow!!!!
+                        </TextBlock>
+                    </ToolTip>
+                </Label.ToolTip>
+            </Label>
             <Label x:Name="ImageResLabel" Height="26" Width="210" Canvas.Left="20" Canvas.Top="105" Content="Current Image Resolution:" HorizontalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBox x:Name="RenderMultiplierTextbox" Height="26" Width="110" Canvas.Left="125" Canvas.Top="136" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="RenderMultiplierTextbox_TextChanged" FontSize="16">
                 <TextBox.ToolTip>
@@ -56,7 +66,23 @@
                 <ComboBoxItem Content="8192 x 8192" Tag="8192"/>
                 <ComboBoxItem Content="16384 x 16384" Tag="16384"/>
             </ComboBox>
+            <ComboBox x:Name="PrecisionComboBox" Canvas.Left="79" Canvas.Top="237" Width="155" SelectionChanged="PrecisionChanged_Event" HorizontalAlignment="Left" VerticalAlignment="Center" SelectedIndex="0">
+                <ComboBoxItem Content="Double" IsSelected="True" Tag="0"/>
+                <ComboBoxItem Content="Decimal" Tag="1" />
+                <ComboBoxItem Content="High Precision Decimal" Tag="2"/>
+            </ComboBox>
             <Label Height="26" Width="210" Canvas.Left="1045" Canvas.Top="79" Content="Save Resolution:" HorizontalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Label Height="26" Width="214" Canvas.Left="20" Canvas.Top="274" Content="High Precision Decimal Digits:" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <Label.ToolTip>
+                    <ToolTip>
+                        <TextBlock>
+                            Affects how many digits after the decimal dot can calculate.<LineBreak/>
+                            * the higher the number the longer the calculations will take
+                        </TextBlock>
+                    </ToolTip>
+                </Label.ToolTip>
+            </Label>
+            <TextBox x:Name="PrecisionTextBox" Height="26" Width="49" Canvas.Left="186" Canvas.Top="274" TextChanged="Precision_TextChanged" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Top" Text="30"/>
         </Canvas>
     </Grid>
 </Window>

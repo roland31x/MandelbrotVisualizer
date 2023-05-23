@@ -34,18 +34,18 @@ namespace MandelbrotVisualizer
 
             return Task.FromResult(result);
         }
-        public static Task<Color> GetColorForComplexNumber(MyDecimal a, MyDecimal b, int MaxIter)
+        public static Task<Color> GetColorForComplexNumber(HighPrecisionDecimal a, HighPrecisionDecimal b, int MaxIter)
         {
-            MyDecimal x = a;
-            MyDecimal y = b;
+            HighPrecisionDecimal x = a;
+            HighPrecisionDecimal y = b;
             int n = 0;
             do
             {
-                MyDecimal temp = x * x - y * y + a;
-                y = MyDecimal.Two * x * y + b;
+                HighPrecisionDecimal temp = x * x - y * y + a;
+                y = HighPrecisionDecimal.Two * x * y + b;
                 x = temp;
                 n++;
-            } while (x * x + y * y < MyDecimal.Four && n < MaxIter);
+            } while (x * x + y * y < HighPrecisionDecimal.Four && n < MaxIter);
 
             Color result;
             if (n == MaxIter)

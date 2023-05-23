@@ -7,12 +7,6 @@ using System.Threading.Tasks;
 
 namespace MandelbrotVisualizer
 {
-    public static class PrecisionEngine
-    {
-        static Precision _cp = Precision.DOUBLE;
-        public static Precision CurrentPrecision { get { return _cp; } set { _cp = value; } }
-
-    }
     public enum Precision
     {
         DOUBLE,

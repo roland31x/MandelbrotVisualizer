@@ -41,7 +41,7 @@ namespace MandelbrotVisualizer
             BindingOperations.SetBinding(XMAXBOX, ContentControl.ContentProperty, new Binding("XEnd") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(YMINBOX, ContentControl.ContentProperty, new Binding("MirroredYEnd") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(YMAXBOX, ContentControl.ContentProperty, new Binding("MirroredYStart") { Source = Engine, Mode = BindingMode.OneWay });
-            BindingOperations.SetBinding(ProgressLabel, ContentControl.ContentProperty, new Binding("ProgressString") { Source = Engine, Mode = BindingMode.OneWay });
+            //BindingOperations.SetBinding(ProgressLabel, ContentControl.ContentProperty, new Binding("ProgressString") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(this, FrameworkElement.CursorProperty, new Binding("CurrentCursor") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(ImageResLabel, ContentControl.ContentProperty, new Binding("ResolutionString") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(RenderMultiplierTextbox, TextBox.TextProperty, new Binding("RenderMultiplier") { Source = Engine, Mode = BindingMode.OneWay });
@@ -50,10 +50,13 @@ namespace MandelbrotVisualizer
             BindingOperations.SetBinding(RenderMultiplierTextbox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(IterationTextbox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(ResetButton, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
+            BindingOperations.SetBinding(PrecisionComboBox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
+            BindingOperations.SetBinding(PrecisionTextBox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
 
         }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            BindingOperations.SetBinding(ProgressLabel, ContentControl.ContentProperty, new Binding("ProgressString") { Source = Engine, Mode = BindingMode.OneWay });
             await Engine.InitializeOn(MyCanvas, (int)MyCanvas.Width, (int)MyCanvas.Height);
             BindUIStuff();
         }
@@ -116,7 +119,7 @@ namespace MandelbrotVisualizer
 
         private async void RenderMultiplierTextbox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (double.TryParse(RenderMultiplierTextbox.Text, out double newMultiplier) && newMultiplier >= 1 && newMultiplier <= 28.9)
+            if (double.TryParse(RenderMultiplierTextbox.Text, out double newMultiplier) && newMultiplier >= 0.1 && newMultiplier <= 28.9)
             {
                 if(newMultiplier == Engine.RenderMultiplier)
                 {
@@ -173,6 +176,33 @@ namespace MandelbrotVisualizer
                 }
             }
             this.SaveResolution = SaveResolution;
+        }
+
+        private void PrecisionChanged_Event(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cb = (ComboBox)sender;
+            int precision = Convert.ToInt32((cb.SelectedItem as ComboBoxItem)!.Tag);
+            switch(precision)
+            {
+                case 0:
+                    Engine.CurrentPrecision = Precision.DOUBLE; break;
+                case 1:
+                    Engine.CurrentPrecision = Precision.DECIMAL; break;
+                case 2:
+                    Engine.CurrentPrecision = Precision.HIGHPRECISION; break;
+            }
+        }
+
+        private void Precision_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (int.TryParse(PrecisionTextBox.Text, out int NewPrecision) && NewPrecision >= 10 && NewPrecision <= 100)
+            {
+                if (NewPrecision == HighPrecisionDecimal.CurrentMaxPrecision)
+                {
+                    return;
+                }
+                HighPrecisionDecimal.CurrentMaxPrecision = NewPrecision;
+            }
         }
     }
 }

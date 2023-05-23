@@ -9,14 +9,20 @@ using System.Windows.Controls;
 
 namespace MandelbrotVisualizer
 {
-    public struct MyDecimal : IEquatable<MyDecimal>, IComparable<MyDecimal>
-    {
-        public static MyDecimal Four = new MyDecimal(4m);
-        public static MyDecimal Two = new MyDecimal(2m);
-        public static MyDecimal MinusOne = new MyDecimal(-1m);
-        public static MyDecimal Zero = new MyDecimal(0m);
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-        public static int CurrentMaxPrecision = 10;
+    public struct HighPrecisionDecimal : IEquatable<HighPrecisionDecimal>, IComparable<HighPrecisionDecimal>
+    {
+        public static HighPrecisionDecimal Four = new HighPrecisionDecimal(4m);
+        public static HighPrecisionDecimal Two = new HighPrecisionDecimal(2m);
+        public static HighPrecisionDecimal MinusOne = new HighPrecisionDecimal(-1m);
+        public static HighPrecisionDecimal Zero = new HighPrecisionDecimal(0m);
+
+        public static int CurrentMaxPrecision = 30;
 
         bool isPositive;
         int intValue;
@@ -26,7 +32,7 @@ namespace MandelbrotVisualizer
         {
             get
             {
-                if(_uD == null)
+                if (_uD == null)
                 {
                     for (int i = CurrentSize - 1; i >= 0; i--)
                     {
@@ -38,17 +44,34 @@ namespace MandelbrotVisualizer
                     }
                     _uD = 0;
                     return 0;
-                    
+
                 }
                 else
                 {
                     return (int)_uD;
                 }
-                
+
             }
         }
         int CurrentSize { get { return fraction.Length; } }
-        public MyDecimal(decimal value)
+        public HighPrecisionDecimal(string value)
+        {
+            isPositive = true;
+            fraction = new int[CurrentMaxPrecision + 1];
+            if (value.Contains('-'))
+            {
+                value = value.Replace("-", "");
+                isPositive = false;
+            }
+            string[] number = value.Split('.');
+            intValue = int.Parse(number[0]);
+            for (int i = 0; i < number[1].Length && i < CurrentMaxPrecision; i++)
+            {
+                fraction[i] = number[1][i] - '0';
+            }
+
+        }
+        public HighPrecisionDecimal(decimal value)
         {
             if (value > 0)
             {
@@ -59,7 +82,7 @@ namespace MandelbrotVisualizer
                 isPositive = false;
             }
             intValue = (int)Math.Floor(Math.Abs(value));
-            fraction = new int[CurrentMaxPrecision];
+            fraction = new int[CurrentMaxPrecision + 1];
 
             StringBuilder sb = new StringBuilder();
             sb.Append(value);
@@ -81,13 +104,13 @@ namespace MandelbrotVisualizer
                 }
             }
         }
-        public MyDecimal(int placeholder)
+        public HighPrecisionDecimal(int uselessnumber)
         {
             isPositive = true;
             intValue = 0;
-            fraction = new int[CurrentMaxPrecision];
+            fraction = new int[CurrentMaxPrecision + 1];
         }
-        public static MyDecimal operator +(MyDecimal left, MyDecimal right)
+        public static HighPrecisionDecimal operator +(HighPrecisionDecimal left, HighPrecisionDecimal right)
         {
             if (!left.isPositive || !right.isPositive)
             {
@@ -105,7 +128,8 @@ namespace MandelbrotVisualizer
                 }
             }
 
-            MyDecimal toReturn = new MyDecimal(Math.Max(left.CurrentSize, right.CurrentSize));
+            HighPrecisionDecimal toReturn = new HighPrecisionDecimal(Math.Max(left.CurrentSize, right.CurrentSize));
+
             //int sizediff = left.CurrentSize - right.CurrentSize;
             //if (sizediff > 0)
             //{
@@ -115,6 +139,7 @@ namespace MandelbrotVisualizer
             //{
             //    left.ExtendPrecision(Math.Abs(sizediff));
             //}
+
             toReturn.intValue = left.intValue + right.intValue;
             for (int i = Math.Max(left.usedDecimals, right.usedDecimals) - 1; i >= 1; i--)
             {
@@ -136,7 +161,7 @@ namespace MandelbrotVisualizer
             return toReturn;
 
         }
-        public static MyDecimal operator -(MyDecimal left, MyDecimal right)
+        public static HighPrecisionDecimal operator -(HighPrecisionDecimal left, HighPrecisionDecimal right)
         {
             if (left.isPositive && !right.isPositive)
             {
@@ -162,7 +187,8 @@ namespace MandelbrotVisualizer
                 return (right.Absolute() - left.Absolute()).Negative();
             }
 
-            MyDecimal toReturn = new MyDecimal(Math.Max(left.CurrentSize, right.CurrentSize));
+            HighPrecisionDecimal toReturn = new HighPrecisionDecimal(Math.Max(left.CurrentSize, right.CurrentSize));
+
             //int sizediff = left.CurrentSize - right.CurrentSize;
             //if (sizediff > 0)
             //{
@@ -197,11 +223,11 @@ namespace MandelbrotVisualizer
 
             return toReturn;
         }
-        public static MyDecimal operator *(MyDecimal left, MyDecimal right)
+        public static HighPrecisionDecimal operator *(HighPrecisionDecimal left, HighPrecisionDecimal right)
         {
             if (left.intValue * right.intValue > 1000000)
             {
-                throw new InvalidOperationException("This struct is made for infinite precision towards zero!!");
+                throw new OverflowException("This struct is made for infinite precision towards zero!!");
             }
             bool ResultSign = true;
             if (!left.isPositive || !right.isPositive)
@@ -211,7 +237,7 @@ namespace MandelbrotVisualizer
                     ResultSign = false;
                 }
             }
-            MyDecimal toReturn = new MyDecimal(left.CurrentSize + right.CurrentSize);
+            HighPrecisionDecimal toReturn = new HighPrecisionDecimal(left.CurrentSize + right.CurrentSize);
             int[] intvalues = new int[8];
             int[] leftint = new int[8];
             int[] rightint = new int[8];
@@ -237,7 +263,7 @@ namespace MandelbrotVisualizer
             {
                 for (int j = right.usedDecimals - 1; j >= 0; j--)
                 {
-                    if (i + j + 1 >= CurrentMaxPrecision)
+                    if (i + j + 1 > CurrentMaxPrecision)
                     {
                         continue;
                     }
@@ -340,46 +366,46 @@ namespace MandelbrotVisualizer
             toReturn.isPositive = ResultSign;
             return toReturn;
         }
-        public static bool operator <(MyDecimal left, MyDecimal right)
+        public static bool operator <(HighPrecisionDecimal left, HighPrecisionDecimal right)
         {
             return left.CompareTo(right) < 0;
         }
-        public static bool operator >(MyDecimal left, MyDecimal right)
+        public static bool operator >(HighPrecisionDecimal left, HighPrecisionDecimal right)
         {
             return left.CompareTo(right) > 0;
         }
-        public static bool operator <=(MyDecimal left, MyDecimal right)
+        public static bool operator <=(HighPrecisionDecimal left, HighPrecisionDecimal right)
         {
             return left.CompareTo(right) <= 0;
         }
-        public static bool operator >=(MyDecimal left, MyDecimal right)
+        public static bool operator >=(HighPrecisionDecimal left, HighPrecisionDecimal right)
         {
             return left.CompareTo(right) >= 0;
         }
-        public static bool operator ==(MyDecimal left, MyDecimal right)
+        public static bool operator ==(HighPrecisionDecimal left, HighPrecisionDecimal right)
         {
             return left.CompareTo(right) == 0;
         }
-        public static bool operator !=(MyDecimal left, MyDecimal right)
+        public static bool operator !=(HighPrecisionDecimal left, HighPrecisionDecimal right)
         {
             return left.CompareTo(right) != 0;
         }
-        MyDecimal Negative()
+        HighPrecisionDecimal Negative()
         {
-            MyDecimal neg = Clone();
+            HighPrecisionDecimal neg = Clone();
             neg.isPositive = false;
             return neg;
         }
-        MyDecimal Absolute()
+        HighPrecisionDecimal Absolute()
         {
-            MyDecimal abs = Clone();
+            HighPrecisionDecimal abs = Clone();
             abs.isPositive = true;
             return abs;
         }
-        MyDecimal Clone()
+        HighPrecisionDecimal Clone()
         {
-            MyDecimal toReturn = new MyDecimal(this.CurrentSize);
-            for (int i = 0; i < usedDecimals; i++)
+            HighPrecisionDecimal toReturn = new HighPrecisionDecimal(this.CurrentSize);
+            for (int i = 0; i < usedDecimals && i < CurrentMaxPrecision + 1; i++)
             {
                 toReturn.fraction[i] = fraction[i];
             }
@@ -396,7 +422,7 @@ namespace MandelbrotVisualizer
             }
             stringBuilder.Append(intValue);
             stringBuilder.Append('.');
-            if(usedDecimals == 0)
+            if (usedDecimals == 0)
             {
                 stringBuilder.Append('0');
             }
@@ -406,11 +432,11 @@ namespace MandelbrotVisualizer
                 {
                     stringBuilder.Append(fraction[i]);
                 }
-            }           
+            }
             return stringBuilder.ToString();
         }
 
-        public int CompareTo(MyDecimal other)
+        public int CompareTo(HighPrecisionDecimal other)
         {
 
             if (this.intValue < other.intValue)
@@ -449,8 +475,8 @@ namespace MandelbrotVisualizer
         {
             decimal toReturn = 0;
             toReturn += intValue;
-            
-            for(int i = 0; i < 28 && i < usedDecimals; i++)
+
+            for (int i = 0; i < 28 && i < usedDecimals; i++)
             {
                 toReturn += fraction[i] / (decimal)Math.Pow(10, i + 1);
             }
@@ -482,14 +508,14 @@ namespace MandelbrotVisualizer
             return toReturn;
 
         }
-        public bool Equals(MyDecimal other)
+        public bool Equals(HighPrecisionDecimal other)
         {
             return this.CompareTo(other) == 0;
         }
 
         public override bool Equals(object? obj)
         {
-            if (obj is MyDecimal)
+            if (obj is HighPrecisionDecimal)
             {
                 return this.Equals(obj);
             }
