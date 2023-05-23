@@ -154,6 +154,7 @@ namespace MandelbrotVisualizer
 
         private async void ResetBUtton_Click(object sender, RoutedEventArgs e)
         {
+            PrecisionComboBox.SelectedIndex = 0;
             await Engine.ResetToDefaults();
         }
 
@@ -168,7 +169,7 @@ namespace MandelbrotVisualizer
             }
             if(SaveResolution > 8000)
             {
-                MessageBoxResult mbr = MessageBox.Show($"{SaveResolution} x {SaveResolution} is going to result in a massive image and will take a long time to save, are you sure you want to use this resolution?","Warning",MessageBoxButton.YesNo );
+                MessageBoxResult mbr = MessageBox.Show($"{SaveResolution} x {SaveResolution} is going to result in a massive image and will take a VERY long time to save, are you sure you want to use this resolution?","Warning",MessageBoxButton.YesNo );
                 if(mbr == MessageBoxResult.No)
                 {
                     cb.SelectedIndex = 0;

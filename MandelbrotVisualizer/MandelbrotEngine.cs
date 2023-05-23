@@ -227,6 +227,7 @@ namespace MandelbrotVisualizer
             YStart = new HighPrecisionDecimal(-2m);
             YEnd = new HighPrecisionDecimal(2m);
             MaxIterations = 100;
+            CurrentPrecision = Precision.DOUBLE;
 
             await ReDraw();
         }
