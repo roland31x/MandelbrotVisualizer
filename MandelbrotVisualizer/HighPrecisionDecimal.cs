@@ -22,7 +22,7 @@ using System.Threading.Tasks;
         public static HighPrecisionDecimal MinusOne = new HighPrecisionDecimal(-1m);
         public static HighPrecisionDecimal Zero = new HighPrecisionDecimal(0m);
 
-        public static int CurrentMaxPrecision = 30;
+        public static int CurrentMaxPrecision = 50;
 
         bool isPositive;
         int intValue;

@@ -59,7 +59,9 @@
             <Label Height="26" Width="210" Canvas.Left="20" Canvas.Top="188" Content="Number of Iterations:" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBox x:Name="IterationTextbox" Height="26" Width="90" Canvas.Left="145" Canvas.Top="188" TextChanged="IterationTextbox_TextChanged" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="0.567,2.487"/>
             <ComboBox x:Name="SaveResComboBox" Canvas.Left="1090" Canvas.Top="105" Width="120" SelectionChanged="ComboBox_SelectionChanged" HorizontalAlignment="Center" VerticalAlignment="Top" SelectedIndex="0">
-                <ComboBoxItem Content="800 x 800" IsSelected="True" Tag="800"/>
+                <ComboBoxItem Content="200 x 200" IsSelected="True" Tag="200"/>
+                <ComboBoxItem Content="400 x 400" Tag="400"/>
+                <ComboBoxItem Content="800 x 800" Tag="800"/>
                 <ComboBoxItem Content="1600 x 1600" Tag="1600" />
                 <ComboBoxItem Content="2048 x 2048" Tag="2048"/>
                 <ComboBoxItem Content="4096 x 4096" Tag="4096"/>
@@ -67,9 +69,9 @@
                 <ComboBoxItem Content="16384 x 16384" Tag="16384"/>
             </ComboBox>
             <ComboBox x:Name="PrecisionComboBox" Canvas.Left="79" Canvas.Top="237" Width="155" SelectionChanged="PrecisionChanged_Event" HorizontalAlignment="Left" VerticalAlignment="Center" SelectedIndex="0">
-                <ComboBoxItem Content="Double" IsSelected="True" Tag="0"/>
+                <ComboBoxItem Content="Double" Tag="0"/>
                 <ComboBoxItem Content="Decimal" Tag="1" />
-                <ComboBoxItem Content="High Precision Decimal" Tag="2"/>
+                <ComboBoxItem Content="High Precision Decimal"  IsSelected="True" Tag="2"/>
             </ComboBox>
             <Label Height="26" Width="210" Canvas.Left="1045" Canvas.Top="79" Content="Save Resolution:" HorizontalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             <Label Height="26" Width="214" Canvas.Left="20" Canvas.Top="274" Content="High Precision Decimal Digits:" HorizontalAlignment="Center" VerticalAlignment="Top">
@@ -82,7 +84,8 @@
                     </ToolTip>
                 </Label.ToolTip>
             </Label>
-            <TextBox x:Name="PrecisionTextBox" Height="26" Width="49" Canvas.Left="186" Canvas.Top="274" TextChanged="Precision_TextChanged" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Top" Text="30"/>
+            <TextBox x:Name="PrecisionTextBox" Height="26" Width="49" Canvas.Left="186" Canvas.Top="274" TextChanged="Precision_TextChanged" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Top" Text="50"/>
+            <Label x:Name="SaveProgressLabel"  Height="26" Width="210" Canvas.Left="1048" Canvas.Top="131" Content="" HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         </Canvas>
     </Grid>
 </Window>

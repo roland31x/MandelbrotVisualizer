@@ -30,7 +30,7 @@ namespace MandelbrotVisualizer
         
         MandelbrotEngine Engine = MandelbrotEngine.Instance;
         bool isSaving = false;
-        int SaveResolution = 800;
+        int SaveResolution = 200;
         public MainWindow()
         {
             InitializeComponent();                     
@@ -51,12 +51,13 @@ namespace MandelbrotVisualizer
             BindingOperations.SetBinding(IterationTextbox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(ResetButton, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
             BindingOperations.SetBinding(PrecisionComboBox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
-            BindingOperations.SetBinding(PrecisionTextBox, ContentControl.IsEnabledProperty, new Binding("isNotLoading") { Source = Engine, Mode = BindingMode.OneWay });
+
 
         }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             BindingOperations.SetBinding(ProgressLabel, ContentControl.ContentProperty, new Binding("ProgressString") { Source = Engine, Mode = BindingMode.OneWay });
+            BindingOperations.SetBinding(SaveProgressLabel, ContentControl.ContentProperty, new Binding("SaveProgressString") { Source = Engine, Mode = BindingMode.OneWay });
             await Engine.InitializeOn(MyCanvas, (int)MyCanvas.Width, (int)MyCanvas.Height);
             BindUIStuff();
         }
@@ -162,11 +163,6 @@ namespace MandelbrotVisualizer
         {
             ComboBox cb = (ComboBox)sender;
             int SaveResolution = Convert.ToInt32((cb.SelectedItem as ComboBoxItem)!.Tag);
-            if(SaveResolution < 400)
-            {
-                SaveResolution = 800;
-                cb.SelectedIndex = 0;
-            }
             if(SaveResolution > 8000)
             {
                 MessageBoxResult mbr = MessageBox.Show($"{SaveResolution} x {SaveResolution} is going to result in a massive image and will take a VERY long time to save, are you sure you want to use this resolution?","Warning",MessageBoxButton.YesNo );
@@ -176,6 +172,7 @@ namespace MandelbrotVisualizer
                     return;
                 }
             }
+            Engine.SaveRenderMP = (double)SaveResolution / (double)Engine.DHeight;
             this.SaveResolution = SaveResolution;
         }
 

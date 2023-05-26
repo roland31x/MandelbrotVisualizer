@@ -95,20 +95,20 @@ namespace MandelbrotVisualizer
         }
         Canvas DrawingCanvas { get; set; }
 
-        HighPrecisionDecimal _xs = new HighPrecisionDecimal(-2m);
+        HighPrecisionDecimal _xs = new HighPrecisionDecimal("-1.18679675827279759381317670939904594131643585271926");
         public HighPrecisionDecimal XStart { get { return _xs; } private set { _xs = value; OnPropertyChanged(); } }
 
-        HighPrecisionDecimal _ys = new HighPrecisionDecimal(-2m);
+        HighPrecisionDecimal _ys = new HighPrecisionDecimal("-0.306160315668537037237104114256734859103482222335242");
         public HighPrecisionDecimal YStart { get { return _ys; } private set { _ys = value; OnPropertyChanged(); OnPropertyChanged("MirroredYStart"); } }
         public HighPrecisionDecimal MirroredYStart { get { return HighPrecisionDecimal.MinusOne * _ys; } }
 
-        HighPrecisionDecimal _xe = new HighPrecisionDecimal(2m);
+        HighPrecisionDecimal _xe = new HighPrecisionDecimal("-1.18679675827279759381317670939904594131637345400278");
         public HighPrecisionDecimal XEnd { get { return _xe; } private set { _xe = value; OnPropertyChanged(); } }
 
-        HighPrecisionDecimal _ye = new HighPrecisionDecimal(2m);
+        HighPrecisionDecimal _ye = new HighPrecisionDecimal("-0.306160315668537037237104114256734859103419640067112");
         public HighPrecisionDecimal YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
         public HighPrecisionDecimal MirroredYEnd { get { return HighPrecisionDecimal.MinusOne * _ye; } }
-        int _maxiter = 100;
+        int _maxiter = 750;
         public int MaxIterations { get { return _maxiter; } set { _maxiter = value; OnPropertyChanged(); } }
 
         int _zoom = 100;
@@ -165,7 +165,7 @@ namespace MandelbrotVisualizer
                 _DW = value;
             }
         }
-        double _rm = 1;
+        double _rm = 0.1;
         public double RenderMultiplier { get { return _rm; } set { _rm = value; OnPropertyChanged(); } } 
 
         int RenderWidth { get { return (int)(RenderMultiplier * _DW); } }
@@ -192,6 +192,26 @@ namespace MandelbrotVisualizer
         }
 
 
+        public double SaveRenderMP { get; set; } = 0.25;
+        int _Sprogress = 0;
+        int SaveCurrentProgress { get { return _Sprogress; } set { _Sprogress = value; OnPropertyChanged("SaveProgressString"); } }
+        double SaveConvertedProgress { get { return (double)_Sprogress / (SaveRenderMP * DHeight * SaveRenderMP * DWidth); } }
+        public string SaveProgressString
+        {
+            get
+            {
+                if (_Sprogress == 0)
+                {
+                    return string.Empty;
+                }
+                if (SaveConvertedProgress <= 0.99)
+                    return $"Saving... {Math.Round(SaveConvertedProgress * 100, 1)}%";
+                else
+                    return "Rendering image...";
+            }
+        }
+
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = "")
         {
@@ -207,7 +227,7 @@ namespace MandelbrotVisualizer
             DrawingCanvas.MouseLeave += DrawingCanvas_MouseLeave;
             DrawingCanvas.MouseMove += DrawingCanvas_MouseMove;
             DrawingCanvas.MouseWheel += DrawingCanvas_MouseWheel;
-            CurrentPrecision = Precision.DOUBLE;
+            CurrentPrecision = Precision.HIGHPRECISION;
         }
         public async Task InitializeOn(Canvas canvas, int XSize, int YSize)
         {
@@ -219,15 +239,15 @@ namespace MandelbrotVisualizer
         }
         public async Task ResetToDefaults()
         {
-            RenderMultiplier = 1;
-            DWidth = 800;
-            DHeight = 800;
-            XStart = new HighPrecisionDecimal(-2m);
-            XEnd = new HighPrecisionDecimal(2m);
-            YStart = new HighPrecisionDecimal(-2m);
-            YEnd = new HighPrecisionDecimal(2m);
-            MaxIterations = 100;
-            CurrentPrecision = Precision.DOUBLE;
+            //RenderMultiplier = 1;
+            //DWidth = 800;
+            //DHeight = 800;
+            //XStart = new HighPrecisionDecimal(-2m);
+            //XEnd = new HighPrecisionDecimal(2m);
+            //YStart = new HighPrecisionDecimal(-2m);
+            //YEnd = new HighPrecisionDecimal(2m);
+            //MaxIterations = 100;
+            //CurrentPrecision = Precision.DOUBLE;
 
             await ReDraw();
         }
@@ -270,6 +290,7 @@ namespace MandelbrotVisualizer
             HighPrecisionDecimal xe = XEnd;
             HighPrecisionDecimal ys = YStart;
             HighPrecisionDecimal ye = YEnd;
+            SaveCurrentProgress = 0;
 
             BitmapSource bitmap = BitmapSource.Create(Resolution, Resolution, 300, 300, PixelFormats.Bgra32, null, await GetStreamForImage(Resolution, Resolution, Iterations, xs, xe, ys, ye), Resolution * 4);
 
@@ -280,6 +301,7 @@ namespace MandelbrotVisualizer
             {
                 encoder.Save(stream);
             }
+            SaveCurrentProgress = 0;
         }
         Task<byte[]> GetStream(int h, int w)
         {
@@ -354,6 +376,7 @@ namespace MandelbrotVisualizer
                     result[index + 1] = computed.G;
                     result[index + 2] = computed.R;
                     result[index + 3] = computed.A;
+                    SaveCurrentProgress++;
                 }               
             }
 
@@ -419,7 +442,7 @@ namespace MandelbrotVisualizer
                     result[index + 1] = computed.G;
                     result[index + 2] = computed.R;
                     result[index + 3] = computed.A;
-
+                    SaveCurrentProgress++;
                                    
                 }
             }
@@ -449,7 +472,7 @@ namespace MandelbrotVisualizer
         {
             if (isLoading)
                 return;
-            if (RenderHeight >= 8000 || RenderWidth >= 8000)
+            if (RenderHeight >= 1000 || RenderWidth >= 1000)
             {
                 MessageBoxResult warning = MessageBox.Show("You are about to begin calculating a massive resultion image, this might take a while, are you sure you want to do it?", "Warning!", MessageBoxButton.YesNo);
                 if (warning == MessageBoxResult.No)
