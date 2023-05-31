@@ -16,9 +16,9 @@
                 <Canvas x:Name="MyCanvas" Background="Aquamarine" Height="800" Width="800" Canvas.Top="80" Canvas.Left="240" HorizontalAlignment="Center" VerticalAlignment="Top"></Canvas>
             </Border>
 
-            <Label x:Name="YMINBOX" HorizontalAlignment="Center" VerticalAlignment="Top" Width="400" HorizontalContentAlignment="Center" FontSize="14" Content="" Canvas.Left="440" Canvas.Top="883"/>
+            <Label x:Name="YMINBOX" HorizontalAlignment="Left" VerticalAlignment="Center" Width="1260" HorizontalContentAlignment="Center" FontSize="14" Content="" Canvas.Left="10" Canvas.Top="883"/>
             <Label x:Name="XMAXBOX" HorizontalAlignment="Left" VerticalAlignment="Center" Width="227" VerticalContentAlignment="Center" FontSize="14" Content="" RenderTransformOrigin="0.5,0.5" Canvas.Left="1043" Canvas.Top="466"/>
-            <Label x:Name="YMAXBOX" HorizontalAlignment="Center" VerticalAlignment="Top" Width="400" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="14" Content="" Canvas.Left="441" Canvas.Top="50"/>
+            <Label x:Name="YMAXBOX" HorizontalAlignment="Left" VerticalAlignment="Center" Width="804" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="14" Content="" Canvas.Left="239" Canvas.Top="50"/>
             <Label x:Name="XMINBOX" HorizontalAlignment="Left" VerticalAlignment="Center" Width="229" HorizontalContentAlignment="Right" FontSize="14" Content="" RenderTransformOrigin="0.5,0.5" Canvas.Top="466" VerticalContentAlignment="Center" Canvas.Left="10"/>
             <Label x:Name="ProgressLabel" Width="400" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" Content="App is loading..." Canvas.Left="440" Canvas.Top="10" HorizontalAlignment="Center" VerticalAlignment="Top" FontWeight="Bold" FontStyle="Italic"/>
             <Button x:Name="SaveButton" Content="SAVE IMAGE" Canvas.Left="1050" Canvas.Top="10" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="22" Width="200" FontFamily="Verdana" Background="#FF00FF27" Click="SaveButton_Click" Height="54"/>
@@ -69,9 +69,9 @@
                 <ComboBoxItem Content="16384 x 16384" Tag="16384"/>
             </ComboBox>
             <ComboBox x:Name="PrecisionComboBox" Canvas.Left="79" Canvas.Top="237" Width="155" SelectionChanged="PrecisionChanged_Event" HorizontalAlignment="Left" VerticalAlignment="Center" SelectedIndex="0">
-                <ComboBoxItem Content="Double" Tag="0"/>
+                <ComboBoxItem Content="Double"  IsSelected="True" Tag="0"/>
                 <ComboBoxItem Content="Decimal" Tag="1" />
-                <ComboBoxItem Content="High Precision Decimal"  IsSelected="True" Tag="2"/>
+                <ComboBoxItem Content="High Precision Decimal" Tag="2"/>
             </ComboBox>
             <Label Height="26" Width="210" Canvas.Left="1045" Canvas.Top="79" Content="Save Resolution:" HorizontalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             <Label Height="26" Width="214" Canvas.Left="20" Canvas.Top="274" Content="High Precision Decimal Digits:" HorizontalAlignment="Center" VerticalAlignment="Top">
@@ -84,7 +84,7 @@
                     </ToolTip>
                 </Label.ToolTip>
             </Label>
-            <TextBox x:Name="PrecisionTextBox" Height="26" Width="49" Canvas.Left="186" Canvas.Top="274" TextChanged="Precision_TextChanged" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Top" Text="50"/>
+            <TextBox x:Name="PrecisionTextBox" Height="26" Width="49" Canvas.Left="186" Canvas.Top="274" TextChanged="Precision_TextChanged" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Top" Text="28"/>
             <Label x:Name="SaveProgressLabel"  Height="26" Width="210" Canvas.Left="1048" Canvas.Top="131" Content="" HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         </Canvas>
     </Grid>

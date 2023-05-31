@@ -95,20 +95,20 @@ namespace MandelbrotVisualizer
         }
         Canvas DrawingCanvas { get; set; }
 
-        HighPrecisionDecimal _xs = new HighPrecisionDecimal("-1.18679675827279759381317670939904594131643585271926");
+        HighPrecisionDecimal _xs = new HighPrecisionDecimal(-2m);
         public HighPrecisionDecimal XStart { get { return _xs; } private set { _xs = value; OnPropertyChanged(); } }
 
-        HighPrecisionDecimal _ys = new HighPrecisionDecimal("-0.306160315668537037237104114256734859103482222335242");
+        HighPrecisionDecimal _ys = new HighPrecisionDecimal(-2m);
         public HighPrecisionDecimal YStart { get { return _ys; } private set { _ys = value; OnPropertyChanged(); OnPropertyChanged("MirroredYStart"); } }
         public HighPrecisionDecimal MirroredYStart { get { return HighPrecisionDecimal.MinusOne * _ys; } }
 
-        HighPrecisionDecimal _xe = new HighPrecisionDecimal("-1.18679675827279759381317670939904594131637345400278");
+        HighPrecisionDecimal _xe = new HighPrecisionDecimal(2m);
         public HighPrecisionDecimal XEnd { get { return _xe; } private set { _xe = value; OnPropertyChanged(); } }
 
-        HighPrecisionDecimal _ye = new HighPrecisionDecimal("-0.306160315668537037237104114256734859103419640067112");
+        HighPrecisionDecimal _ye = new HighPrecisionDecimal(2m);
         public HighPrecisionDecimal YEnd { get { return _ye; } private set { _ye = value; OnPropertyChanged(); OnPropertyChanged("MirroredYEnd"); } }
         public HighPrecisionDecimal MirroredYEnd { get { return HighPrecisionDecimal.MinusOne * _ye; } }
-        int _maxiter = 750;
+        int _maxiter = 1100;
         public int MaxIterations { get { return _maxiter; } set { _maxiter = value; OnPropertyChanged(); } }
 
         int _zoom = 100;
@@ -165,7 +165,7 @@ namespace MandelbrotVisualizer
                 _DW = value;
             }
         }
-        double _rm = 0.1;
+        double _rm = 1;
         public double RenderMultiplier { get { return _rm; } set { _rm = value; OnPropertyChanged(); } } 
 
         int RenderWidth { get { return (int)(RenderMultiplier * _DW); } }

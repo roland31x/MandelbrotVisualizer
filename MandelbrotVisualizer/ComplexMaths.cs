@@ -54,7 +54,7 @@ namespace MandelbrotVisualizer
             }
             else
             {
-                result = Rainbow((float)n / (float)MaxIter);
+                result = Rainbow((float)n / ((float)MaxIter));
             }
 
             return Task.FromResult(result);
