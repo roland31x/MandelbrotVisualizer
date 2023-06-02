@@ -63,6 +63,7 @@ using System.Threading.Tasks;
                 value = value.Replace("-", "");
                 isPositive = false;
             }
+            value = value.Replace(",", ".");
             string[] number = value.Split('.');
             intValue = int.Parse(number[0]);
             for (int i = 0; i < number[1].Length && i < CurrentMaxPrecision; i++)
@@ -97,7 +98,7 @@ using System.Threading.Tasks;
                 }
                 else if (!ok)
                 {
-                    if (sb[i] == '.')
+                    if (sb[i] == '.' || sb[i] == ',')
                     {
                         ok = true;
                     }

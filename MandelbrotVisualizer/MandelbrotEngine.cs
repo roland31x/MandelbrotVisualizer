@@ -239,15 +239,14 @@ namespace MandelbrotVisualizer
         }
         public async Task ResetToDefaults()
         {
-            //RenderMultiplier = 1;
+            RenderMultiplier = 1;
             //DWidth = 800;
             //DHeight = 800;
-            //XStart = new HighPrecisionDecimal(-2m);
-            //XEnd = new HighPrecisionDecimal(2m);
-            //YStart = new HighPrecisionDecimal(-2m);
-            //YEnd = new HighPrecisionDecimal(2m);
-            //MaxIterations = 100;
-            //CurrentPrecision = Precision.DOUBLE;
+            XStart = new HighPrecisionDecimal(-2m);
+            XEnd = new HighPrecisionDecimal(2m);
+            YStart = new HighPrecisionDecimal(-2m);
+            YEnd = new HighPrecisionDecimal(2m);
+            MaxIterations = 100;
 
             await ReDraw();
         }
